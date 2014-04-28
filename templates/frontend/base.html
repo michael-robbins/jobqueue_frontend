@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="{% static 'css/bootstrap-fluid-adj.css' %}" rel="stylesheet">
+        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
+        <link href="{% static 'css/bootstrap-responsive.css' %}" rel="stylesheet">
+
+        <title>Frontend - {% block title %}Managing all your Media!{% endblock %}</title>
+    </head>
+    <body>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+           <div class="navbar-inner">
+               <div class="container">
+                   <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                       <span class="icon-bar"></span>
+                       <span class="icon-bar"></span>
+                       <span class="icon-bar"></span>
+                   </button>
+                   <a class="brand" href="/frontend/">Frontend</a>
+
+                   <div class="nav-collapse collapse">
+                       <ul class="nav pull-right">
+                           {% if user.is_authenticated %}
+                           <li class="navbar-text">Welcome, {{ user.username }}!</li>
+                           <li><a href="/frontend/profile/">Profile</a></li>
+                           <li><a href="/frontend/logout/">Logout</a></li>
+                           {% else %}
+                           <li><a href="/frontend/login/">Login</a></li>
+                           {% endif %}
+                       </ul>
+                       <ul class="nav">
+                           {% if user.is_authenticated %}
+                           <li><a href="/frontend/media/packages/">View Media</a></li>
+                           <li><a href="/frontend/media/types/">Media Types</a></li>
+                           <li><a href="/frontend/media/discover/">Discover Media</a></li>
+                           <li><a href="/frontend/clients/">Clients</a></li>
+                           <li><a href="/frontend/jobs/">Jobs</a></li>
+                           <li><a href="/frontend/about/">About</a></li>
+                           {% endif %}
+                       </ul>
+                   </div>
+                   <!--/.nav-collapse -->
+               </div>
+           </div>
+        </div>
+
+            <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span3">
+                    <div class="well sidebar-nav">
+                        {% block sidebar %}
+                        {% endblock %}
+                        <div id="types">
+                            {% if media_types %}
+                            <ul class="nav nav-list"><li>Media Types</li></ul>
+                            {% include "frontend/media_type_list.html" with media_types=media_types %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="span9">
+                    {% block body_block %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+
+        <hr>        
+
+        <footer>
+            <div class="container">
+                <p>&copy; Frontend: Managing all your Media</p>
+            </div>
+        </footer>
+
+        <script src="{% static 'js/jquery-2.1.0.min.js' %}"></script>
+        <script src="{% static 'js/bootstrap.min.js' %}"></script>
+        <script src="{% static 'js/frontend-ajax.js' %}"></script>
+    </body>
+</html>

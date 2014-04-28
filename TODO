@@ -1,0 +1,36 @@
+* Add in extra user restrictions
+    * Individual Package overrides
+        * Included and excluded (takes precedence over content rating restriction)
+        * Probably through some sort of DB table:
+            * User
+            * Package
+            * Action (ALLOW, DENY)
+    * Package content rating restriction
+        * Child's account vs Parent's account, both tied to the same Client
+        * This would have to be in the Metadata I'm guessing
+        * Each User has a Choice attribute
+            * Everything (default)
+            * R
+            * MA
+            * M
+            * PG
+            * G
+        * If a Package has no Content Rating then (ALLOW/DENY)?
+    * Restrict a User to viewing only jobs from their associated Client
+        * Each User has a ForeignKey attribute tied to the Client table
+        * If a User has no tied Client, then we allow them to see (ALL/NONE) jobs?
+        * If a User is a superuser they can see ALL jobs in the system
+    * 'Media Types' page
+        * Limit to just Super Users
+    * 'Discover Media' page
+        * Should this be restricted on a per-user/client basis?
+        * Should this be restricted or just Super Users?
+    * 'Clients' page
+        * Super Users gets a list view of all Clients
+        * Users get a detailed view of their specific Client
+            * This means we need to modify the base template to be context sensitive
+
+* Look into generic templates
+    * 'List View' template
+    * 'Item Edit' template
+    * 'Item Add'  template

@@ -1,0 +1,36 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block body_block %}
+<div class="hero-unit">
+    <h1>Frontend!</h1>
+    <p>Manage ALL the Media!</p>
+</div>
+
+<div class="row-fluid">
+    <div class="span6">
+        <h2>Your Job Queue</h2>
+        {% if user_job_queue %}
+        <ul>
+            {% for job in user_job_queue %}
+            <li><a href="/frontend/media/job/{{ job.id }}">{{ job }}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <strong>You don't have any jobs in the queue.</strong>
+        {% endif %}
+    </div>
+    <div class="span6">
+        <h2>Your last 5 Jobs</h2>
+        {% if user_job_history %}
+        <ul>
+            {% for job in user_job_history %}
+            <li><a href="/frontend/media/job/{{job.id }}">{{ job }}</a></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <strong>You don't have any old jobs.</strong>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
