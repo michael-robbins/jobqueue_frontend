@@ -72,9 +72,12 @@ class Job(models.Model):
     user               = models.ForeignKey(User)
 
     def __str__(self):
+        state  = [ i[1] for i in JOB_STATES if i[0] == self.state ][0]
+        action = [ i[1] for i in JOB_ACTIONS if i[0] == self.action ][0]
+
         return "{0} - {1} - {2} - {3} -> {4}".format(
-                    self.state
-                    , self.action
+                    state
+                    , action
                     , self.package
                     , self.source_client
                     , self.destination_client)

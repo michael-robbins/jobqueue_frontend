@@ -25,10 +25,10 @@
                        <ul class="nav pull-right">
                            {% if user.is_authenticated %}
                            <li class="navbar-text">Welcome, {{ user.username }}!</li>
-                           <li><a href="/frontend/profile/">Profile</a></li>
-                           <li><a href="/frontend/logout/">Logout</a></li>
+                           <li><a href="{{ base_url }}/profile/">Profile</a></li>
+                           <li><a href="{{ base_url }}/logout/">Logout</a></li>
                            {% else %}
-                           <li><a href="/frontend/login/">Login</a></li>
+                           <li><a href="{{ base_url }}/login/">Login</a></li>
                            {% endif %}
                        </ul>
                        <ul class="nav">

@@ -37,6 +37,8 @@ def base_request(request):
     context = RequestContext(request)
     context_dict = dict()
 
+    context_dict['base_url'] = '/frontend'
+
     return context, context_dict
 
 @login_required
@@ -194,6 +196,17 @@ def jobs(request):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/jobs.html', context_dict, context)
+
+@login_required
+def job_view(request):
+    context, context_dict = base_request(request)
+
+    user = User.objects.get(username=request.user)
+
+    context_dict['user_job_queue']   = Job.objects.filter(user=user) \
+                                                  .filter(Q(state='PEND') | Q(state='PROG'))
+
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def job_add(request):

@@ -1,0 +1,18 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block body_block %}
+<div class="hero-unit">
+    <h1>{{ list_name }}</h1>
+    <br />
+    {% if list %}
+    <ul>
+        {% for job in user_job_queue %}
+        <li><a href="/frontend/jobs/{{ job.id }}">{{ job }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <strong>{{ empty_message }}</strong>
+    {% endif %}
+</div>
+{% endblock %}

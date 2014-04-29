@@ -27,6 +27,7 @@ urlpatterns = patterns(''
         , url(r'^clients/(?P<client>\w+)/edit/$', views.client_edit, name='client_edit')
 
         , url(r'^jobs/$', views.jobs, name='jobs')
+        , url(r'^jobs/(?P<id>\w+)/$', views.job_view, name='jobs')
         , url(r'^jobs/add/$', views.job_add, name='job_add')
         , url(r'^jobs/history/$', views.job_history, name='job_history')
         , url(r'^jobs/history/(?P<client>\w+)/$', views.job_history_client, name='job_history_client')
