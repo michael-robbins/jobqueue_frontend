@@ -15,7 +15,7 @@ from frontend.forms import ClientForm, MediaTypeForm, PackageForm, JobForm
 ####################
 # Helper Functions #
 ####################
-def has_permissions(user):
+def has_permissions(user, action, object_id):
     """
     Think about how I am going to implement permissions
     * Has someone online got a good method?
@@ -222,11 +222,19 @@ def job_view(request, job_id):
     context, context_dict = base_request(request)
 
     user = User.objects.get(username=request.user)
+    job  = Job.objects.get(id=job_id)
 
-    context_dict['user_job_queue'] = Job.objects.filter(user=user) \
-                                                .filter(Q(state='PEND') | Q(state='PROG'))
+    if job:
+        allowed, message = has_permissions(user, 'view_job', job_id)
+    else:
+        return render_to_response('frontend/404.html', context_dict, context)
 
-    return render_to_response('frontend/list_view.html', context_dict, context)
+    if allowed:
+        context_dict['item'] = Job
+        return render_to_response('frontend/item_view.html', context_dict, context)
+    else:
+        context_dict['message'] = message
+        return render_to_response('frontend/access_denied.html', context_dict, context)
 
 @login_required
 def job_history(request):
@@ -234,7 +242,7 @@ def job_history(request):
 
     user = User.objects.get(username=request.user)
 
-    context_dict['user_job_queue'] = Job.objects.filter(user=user) \
+    context_dict['list'] = Job.objects.filter(user=user) \
                                                 .filter(Q(state='COMP') | Q(state='FAIL'))
 
     return render_to_response('frontend/list_view.html', context_dict, context)
@@ -243,5 +251,20 @@ def job_history(request):
 def job_history_client(request, client_id):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/job_history_client.html', context_dict, context)
+    user   = User.objects.get(username=request.user)
+    client = Client.objects.get(id=client_id)
+
+    if client:
+        allowed, message = has_permissions(user, 'view_client', client_id)
+    else:
+        return render_to_response('frontend/404.html')
+
+    if allowed:
+        context_dict['list'] = Job.objects.filter(Q(destination_client=client) | Q(source_client=client))
+                                                    .filter(Q(state='COMP') | Q(state='FAIL'))
+
+        return render_to_response('frontend/list_view.html', context_dict, context)
+    else:
+        context_dict['message'] = message
+        return render_to_response('frontend/access_denied.html', context_dict, context)
 
