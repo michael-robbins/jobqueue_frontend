@@ -16,8 +16,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
-with open('/etc/frontend.key') as f:
+try:
+    with open('/etc/frontend.key') as f:
         SECRET_KEY = f.read().strip()
+except FileNotFoundError as e:
+    import string
+    import random
+    SECRET_KEY = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(30))
+    print("WARNING: SECRET_KEY unset, setting to random string: " + SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

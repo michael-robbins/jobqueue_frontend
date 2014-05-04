@@ -114,13 +114,13 @@ def media_type_add(request):
     return render_to_response('frontend/media_type_add.html', context_dict, context)
 
 @login_required
-def media_type_view(request):
+def media_type_view(request, media_type_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/media_type_view.html', context_dict, context)
 
 @login_required
-def media_type_edit(request):
+def media_type_edit(request, media_type_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/media_type_edit.html', context_dict, context)
@@ -132,7 +132,7 @@ def media_discover(request):
     return render_to_response('frontend/media_discover.html', context_dict, context)
 
 @login_required
-def media_discover_client(request):
+def media_discover_client(request, client_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/media_discover_client.html', context_dict, context)
@@ -164,13 +164,13 @@ def media_package_add(request):
     return render_to_response('frontend/media_package_add.html', context_dict, context)
 
 @login_required
-def media_package_view(request):
+def media_package_view(request, package_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/media_package_view.html', context_dict, context)
 
 @login_required
-def media_package_edit(request):
+def media_package_edit(request, package_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/media_package_edit.html', context_dict, context)
@@ -191,13 +191,13 @@ def client_add(request):
     return render_to_response('frontend/client_add.html', context_dict, context)
 
 @login_required
-def client_view(request):
+def client_view(request, client_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/client_view.html', context_dict, context)
 
 @login_required
-def client_edit(request):
+def client_edit(request, client_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/client_edit.html', context_dict, context)
@@ -212,30 +212,35 @@ def jobs(request):
     return render_to_response('frontend/jobs.html', context_dict, context)
 
 @login_required
-def job_view(request):
-    context, context_dict = base_request(request)
-
-    user = User.objects.get(username=request.user)
-
-    context_dict['user_job_queue']   = Job.objects.filter(user=user) \
-                                                  .filter(Q(state='PEND') | Q(state='PROG'))
-
-    return render_to_response('frontend/list_view.html', context_dict, context)
-
-@login_required
 def job_add(request):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/job_add.html', context_dict, context)
 
 @login_required
+def job_view(request, job_id):
+    context, context_dict = base_request(request)
+
+    user = User.objects.get(username=request.user)
+
+    context_dict['user_job_queue'] = Job.objects.filter(user=user) \
+                                                .filter(Q(state='PEND') | Q(state='PROG'))
+
+    return render_to_response('frontend/list_view.html', context_dict, context)
+
+@login_required
 def job_history(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/job_history.html', context_dict, context)
+    user = User.objects.get(username=request.user)
+
+    context_dict['user_job_queue'] = Job.objects.filter(user=user) \
+                                                .filter(Q(state='COMP') | Q(state='FAIL'))
+
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
-def job_history_client(request):
+def job_history_client(request, client_id):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/job_history_client.html', context_dict, context)
