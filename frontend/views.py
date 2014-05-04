@@ -15,7 +15,7 @@ from frontend.forms import ClientForm, MediaTypeForm, PackageForm, JobForm
 ####################
 # Helper Functions #
 ####################
-def has_permissions():
+def has_permissions(user):
     """
     Think about how I am going to implement permissions
     * Has someone online got a good method?
@@ -27,7 +27,7 @@ def has_permissions():
             * Has Job Queue Restriction
             * Has Media Package Restriction
     """
-    pass
+    return True
 
 
 #################
@@ -99,7 +99,7 @@ def profile(request):
 def media(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media.html', context_dict, context)
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def media_types(request):
@@ -141,7 +141,21 @@ def media_discover_client(request):
 def media_packages(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_packages.html', context_dict, context)
+    if request.method == 'POST':
+        filterby = request.POST['filterby']
+        # Sanitize user input
+        media_type = MediaType.objects.filter(name=filterby)    
+        packages = Package.objects.filter(media_type=media_type)
+    else:
+        packages = Package.objects.all()
+
+    if packages:
+        for package in packages:
+            package.url  = 'media/packages/' + str(package.id)
+
+    context_dict['list'] = packages
+
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def media_package_add(request):

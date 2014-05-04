@@ -7,8 +7,11 @@
     <br />
     {% if list %}
     <ul>
-        {% for job in user_job_queue %}
-        <li><a href="/frontend/jobs/{{ job.id }}">{{ job }}</a></li>
+        {% for item in list %}
+        <li>
+            <a href="{{ base_url }}/{{ item.url }}">{{ item.name }}</a>&nbsp;
+            <a href="{{ base_url }}/{{ item.url }}/edit">Edit</a>
+        </li>
         {% endfor %}
     </ul>
     {% else %}

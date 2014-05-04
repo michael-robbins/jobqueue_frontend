@@ -33,12 +33,12 @@
                        </ul>
                        <ul class="nav">
                            {% if user.is_authenticated %}
-                           <li><a href="/frontend/media/packages/">View Media</a></li>
-                           <li><a href="/frontend/media/types/">Media Types</a></li>
-                           <li><a href="/frontend/media/discover/">Discover Media</a></li>
-                           <li><a href="/frontend/clients/">Clients</a></li>
-                           <li><a href="/frontend/jobs/">Jobs</a></li>
-                           <li><a href="/frontend/about/">About</a></li>
+                           <li><a href="{{ base_url }}/media/packages/">View Media</a></li>
+                           <li><a href="{{ base_url }}/media/types/">Media Types</a></li>
+                           <li><a href="{{ base_url }}/media/discover/">Discover Media</a></li>
+                           <li><a href="{{ base_url }}/clients/">Clients</a></li>
+                           <li><a href="{{ base_url }}/jobs/">Jobs</a></li>
+                           <li><a href="{{ base_url }}/about/">About</a></li>
                            {% endif %}
                        </ul>
                    </div>
