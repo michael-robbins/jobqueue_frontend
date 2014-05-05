@@ -1,4 +1,4 @@
-from django.http      import HttpResponse, HttpResponseRedirect
+from django.http      import HttpResponse, HttpResponseRedirect, Http404
 from django.template  import RequestContext
 from django.shortcuts import render_to_response, redirect
 
@@ -26,8 +26,12 @@ def has_permissions(user, action, object_id):
             * Has Content Restriction
             * Has Job Queue Restriction
             * Has Media Package Restriction
+
+    Permission Actions:
+    * view_client
+    * view_job
     """
-    return True
+    return (True, 'Allowed')
 
 
 #################
@@ -45,12 +49,10 @@ def base_request(request):
 def index(request):
     context, context_dict = base_request(request)
 
-    user = User.objects.get(username=request.user)
-
-    context_dict['user_job_queue']   = Job.objects.filter(user=user) \
+    context_dict['user_job_queue']   = Job.objects.filter(user=request.user) \
                                                   .filter(Q(state='PEND') | Q(state='PROG'))
 
-    context_dict['user_job_history'] = Job.objects.filter(user=user) \
+    context_dict['user_job_history'] = Job.objects.filter(user=request.user) \
                                                   .filter(Q(state='COMP') | Q(state='FAIL'))[:5]
 
     return render_to_response('frontend/index.html', context_dict, context)
@@ -59,6 +61,8 @@ def index(request):
 def about(request):
     context, context_dict = base_request(request)
     
+    context_dict['message'] = "Hello {0}!".format(request.user)
+
     return render_to_response('frontend/about.html', context_dict, context)
 
 def user_login(request):
@@ -105,25 +109,25 @@ def media(request):
 def media_types(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_types.html', context_dict, context)
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def media_type_add(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_type_add.html', context_dict, context)
+    return render_to_response('frontend/item_add.html', context_dict, context)
 
 @login_required
 def media_type_view(request, media_type_id):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_type_view.html', context_dict, context)
+    return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
 def media_type_edit(request, media_type_id):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_type_edit.html', context_dict, context)
+    return render_to_response('frontend/item_edit.html', context_dict, context)
 
 @login_required
 def media_discover(request):
@@ -161,19 +165,19 @@ def media_packages(request):
 def media_package_add(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_package_add.html', context_dict, context)
+    return render_to_response('frontend/item_add.html', context_dict, context)
 
 @login_required
 def media_package_view(request, package_id):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_package_view.html', context_dict, context)
+    return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
 def media_package_edit(request, package_id):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/media_package_edit.html', context_dict, context)
+    return render_to_response('frontend/item_edit.html', context_dict, context)
 
 ##################
 # Client Section #
@@ -182,25 +186,25 @@ def media_package_edit(request, package_id):
 def clients(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/clients.html', context_dict, context)
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def client_add(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/client_add.html', context_dict, context)
+    return render_to_response('frontend/item_add.html', context_dict, context)
 
 @login_required
 def client_view(request, client_id):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/client_view.html', context_dict, context)
+    return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
 def client_edit(request, client_id):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/client_edit.html', context_dict, context)
+    return render_to_response('frontend/item_edit.html', context_dict, context)
 
 ###############
 # Job Section #
@@ -209,25 +213,36 @@ def client_edit(request, client_id):
 def jobs(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/jobs.html', context_dict, context)
+    context_dict['list'] = Job.objects.filter(user=request.user) \
+                                      .filter(Q(state='PEND') | Q(state='PROG'))
+
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def job_add(request):
     context, context_dict = base_request(request)
 
-    return render_to_response('frontend/job_add.html', context_dict, context)
+    if request.method == 'POST':
+        form = JobForm(request.POST)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return index(request)
+    else:
+        form = JobForm()
+
+    return render_to_response('frontend/item_add.html', context_dict, context)
 
 @login_required
 def job_view(request, job_id):
     context, context_dict = base_request(request)
 
-    user = User.objects.get(username=request.user)
     job  = Job.objects.get(id=job_id)
 
     if job:
-        allowed, message = has_permissions(user, 'view_job', job_id)
+        allowed, message = has_permissions(request.user, 'view_job', job_id)
     else:
-        return render_to_response('frontend/404.html', context_dict, context)
+        raise Http404
 
     if allowed:
         context_dict['item'] = Job
@@ -240,10 +255,8 @@ def job_view(request, job_id):
 def job_history(request):
     context, context_dict = base_request(request)
 
-    user = User.objects.get(username=request.user)
-
-    context_dict['list'] = Job.objects.filter(user=user) \
-                                                .filter(Q(state='COMP') | Q(state='FAIL'))
+    context_dict['list'] = Job.objects.filter(user=request.user) \
+                                      .filter(Q(state='COMP') | Q(state='FAIL'))
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -251,20 +264,20 @@ def job_history(request):
 def job_history_client(request, client_id):
     context, context_dict = base_request(request)
 
-    user   = User.objects.get(username=request.user)
     client = Client.objects.get(id=client_id)
 
     if client:
-        allowed, message = has_permissions(user, 'view_client', client_id)
+        allowed, message = has_permissions(request.user, 'view_client', client_id)
     else:
-        return render_to_response('frontend/404.html')
+        raise Http404
 
     if allowed:
-        context_dict['list'] = Job.objects.filter(Q(destination_client=client) | Q(source_client=client))
-                                                    .filter(Q(state='COMP') | Q(state='FAIL'))
+        context_dict['list'] = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
+                                          .filter(Q(state='COMP') | Q(state='FAIL'))
 
         return render_to_response('frontend/list_view.html', context_dict, context)
     else:
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
+
 
