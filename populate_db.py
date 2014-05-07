@@ -5,9 +5,9 @@ def populate():
     test_user_1 = add_User(username='test')
 
     test_client_1 = add_Client(name='Test Client #1', host_username='test', host_hostname='testhost1'
-                            , host_port=22, base_path='/data/media/')
+                            , host_port=22, base_path='/data/media/', user=test_user_1)
     test_client_2 = add_Client(name='Test Client #2', host_username='test', host_hostname='testhost2'
-                            , host_port=22, base_path='/data/media/')
+                            , host_port=22, base_path='/data/media/', user=test_user_1)
 
     movie_media_type = add_MediaType('Movies', 'movies/')
     tv_media_type    = add_MediaType('TV Episodes', 'tv/')
@@ -52,9 +52,9 @@ def populate():
 
     sync_job = add_Job('SYNC', movie_package, test_client_2, test_client_1, test_user_1)
 
-def add_Client(name, host_username, host_hostname, host_port, base_path):
+def add_Client(name, host_username, host_hostname, host_port, base_path, user):
     c = Client.objects.get_or_create(name=name, host_username=host_username
-                        , host_hostname=host_hostname, host_port=host_port, base_path=base_path)[0]
+                        , host_hostname=host_hostname, host_port=host_port, base_path=base_path, user=user)[0]
     return c
 
 def add_MediaType(name, relative_path):

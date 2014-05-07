@@ -10,7 +10,7 @@
         {% for item in list %}
         <li>
             <a href="{{ base_url }}/{{ item.url }}">{{ item.name }}</a>&nbsp;
-            <a href="{{ base_url }}/{{ item.url }}/edit">Edit</a>
+            {% if item.can_edit %}<a href="{{ base_url }}/{{ item.url }}/edit">Edit</a>{% endif %}
         </li>
         {% endfor %}
     </ul>

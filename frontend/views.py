@@ -31,7 +31,16 @@ def has_permissions(user, action, object_id):
     * view_client
     * view_job
     """
-    return (True, 'Allowed')
+    allowed = (True, 'Allowed.')
+    denied_not_super   = (False, 'You are not a Super User.')
+    denied_not_allowed = (False, 'You are missing the required privileges.')
+
+    if action == 'view_client':
+        client = Client.objects.get(id=object_id)
+        if client and client.user == user:
+            return allowed
+            
+    return allowed
 
 
 #################
@@ -155,10 +164,11 @@ def media_packages(request):
 
     if packages:
         for package in packages:
-            package.url  = 'media/packages/' + str(package.id)
+            package.url      = 'media/packages/' + str(package.id)
+            if has_permissions(request.user, 'edit_package', package.id)[0]:
+                package.can_edit = True
 
     context_dict['list'] = packages
-
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -177,6 +187,17 @@ def media_package_view(request, package_id):
 def media_package_edit(request, package_id):
     context, context_dict = base_request(request)
 
+    if request.method == 'POST':
+        form = MediaPackageForm(request.POST)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return index(request)
+    else:
+        # Need to figure out here how to pre-fill a form
+        form = MediaPackageForm()
+
+    context_dict['form'] = form
     return render_to_response('frontend/item_edit.html', context_dict, context)
 
 ##################
@@ -186,24 +207,64 @@ def media_package_edit(request, package_id):
 def clients(request):
     context, context_dict = base_request(request)
 
+    clients = Client.objects.all()
+    for client in clients:
+        client.url  = 'clients/{0}/'.format(client.id)
+        if has_permissions(request.user, 'edit_client', client.id)[0]:
+            client.can_edit = True
+
+    context_dict['list'] = clients
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def client_add(request):
     context, context_dict = base_request(request)
 
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return index(request)
+    else:
+        form = ClientForm()
+
+    context_dict['form'] = form
     return render_to_response('frontend/item_add.html', context_dict, context)
 
 @login_required
 def client_view(request, client_id):
     context, context_dict = base_request(request)
+    
+    client = Client.objects.get(id=client_id)
 
-    return render_to_response('frontend/item_view.html', context_dict, context)
+    if client:
+        allowed, message = has_permissions(request.user, 'view_client', client_id)
+    else:
+        raise Http404
+
+    if allowed:
+        context_dict['item'] = Client
+        return render_to_response('frontend/item_view.html', context_dict, context)
+    else:
+        context_dict['message'] = message
+        return render_to_response('frontend/access_denied.html', context_dict, context)
 
 @login_required
 def client_edit(request, client_id):
     context, context_dict = base_request(request)
 
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+
+        if form.is_valid():
+            form.save(commit=True)
+            return index(request)
+    else:
+        # Need to figure out here how to pre-fill a form
+        form = ClientForm()
+
+    context_dict['form'] = form
     return render_to_response('frontend/item_edit.html', context_dict, context)
 
 ###############
@@ -231,6 +292,7 @@ def job_add(request):
     else:
         form = JobForm()
 
+    context_dict['form'] = form
     return render_to_response('frontend/item_add.html', context_dict, context)
 
 @login_required
@@ -255,8 +317,11 @@ def job_view(request, job_id):
 def job_history(request):
     context, context_dict = base_request(request)
 
-    context_dict['list'] = Job.objects.filter(user=request.user) \
+    jobs = Job.objects.filter(user=request.user) \
                                       .filter(Q(state='COMP') | Q(state='FAIL'))
+
+    for job in jobs:
+        job.url = 'jobs/{0}'.format(job.id)
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -274,7 +339,6 @@ def job_history_client(request, client_id):
     if allowed:
         context_dict['list'] = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
                                           .filter(Q(state='COMP') | Q(state='FAIL'))
-
         return render_to_response('frontend/list_view.html', context_dict, context)
     else:
         context_dict['message'] = message

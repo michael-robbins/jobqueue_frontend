@@ -22,6 +22,7 @@ class Client(models.Model):
     base_path     = models.CharField(max_length=256, blank=False)
     max_download  = models.IntegerField(blank=False, default=0)
     max_upload    = models.IntegerField(blank=False, default=0)
+    user          = models.ForeignKey(User)
 
     def __str__(self):
         return self.name
