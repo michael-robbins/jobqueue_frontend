@@ -25,7 +25,7 @@ def has_permissions(user, action, object_id):
         * User
             * Has Content Restriction
             * Has Job Queue Restriction
-            * Has Media Package Restriction
+            * Has Package Restriction
 
     Permission Actions:
     * view_client
@@ -41,6 +41,26 @@ def has_permissions(user, action, object_id):
             return allowed
             
     return allowed
+    
+def get_package_and_permissions(package_id, action):
+    package = Package.objects.get(id=package_id)
+
+    if package:
+        allowed, message = has_permissions(request.user, 'package_{0}'.format(action), media_type)
+    else:
+        raise Http404
+
+    return (package, allowed, message)
+
+def get_media_type_and_permissions(media_type_id, action):
+    media_type = MediaType.objects.get(id=media_type_id)
+
+    if media_type:
+        allowed, message = has_permissions(request.user, 'media_type_{0}'.format(action), media_type)
+    else:
+        raise Http404
+
+    return (package, allowed, message)
 
 
 #################
@@ -66,14 +86,6 @@ def index(request):
 
     return render_to_response('frontend/index.html', context_dict, context)
 
-@login_required
-def about(request):
-    context, context_dict = base_request(request)
-    
-    context_dict['message'] = "Hello {0}!".format(request.user)
-
-    return render_to_response('frontend/about.html', context_dict, context)
-
 def user_login(request):
     context, context_dict = base_request(request)
 
@@ -86,7 +98,7 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return index(request)
+                return redirect(context_dict['base_url'] + '/' )
             else:
                 context_dict['disabled_account'] = True
         else:
@@ -97,7 +109,7 @@ def user_login(request):
 @login_required
 def user_logout(request):
     logout(request)
-    return HttpResponseRedirect('/frontend/')
+    return redirect('/frontend/')
 
 @login_required
 def profile(request):
@@ -105,15 +117,10 @@ def profile(request):
 
     return render_to_response('frontend/profile.html', context_dict, context)
 
-#################
-# Media Section #
-#################
-@login_required
-def media(request):
-    context, context_dict = base_request(request)
 
-    return render_to_response('frontend/list_view.html', context_dict, context)
-
+###############
+# Media Types #
+###############
 @login_required
 def media_types(request):
     context, context_dict = base_request(request)
@@ -130,14 +137,39 @@ def media_type_add(request):
 def media_type_view(request, media_type_id):
     context, context_dict = base_request(request)
 
+    media_type = MediaType.objects.get(id = media_type_id)
+
+    if not media_type:
+        raise Http404
+
     return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
 def media_type_edit(request, media_type_id):
     context, context_dict = base_request(request)
 
+    media_type = MediaType.objects.get(id = media_type_id)
+
+    if not media_type:
+        raise Http404
+
     return render_to_response('frontend/item_edit.html', context_dict, context)
 
+@login_required
+def media_type_delete(request, media_type_id):
+    context, context_dict = base_request(request)
+
+    media_type = MediaType.objects.get(id = media_type_id)
+
+    if not media_type:
+        raise Http404
+
+    return render_to_response('frontend/item_delete.html', context_dict, context)
+
+
+#####################
+# Package Discovery #
+#####################
 @login_required
 def media_discover(request):
     context, context_dict = base_request(request)
@@ -148,57 +180,116 @@ def media_discover(request):
 def media_discover_client(request, client_id):
     context, context_dict = base_request(request)
 
+    client = Client.objects.get(id=client_id)
+
+    if not client:
+        raise Http404
+
     return render_to_response('frontend/media_discover_client.html', context_dict, context)
 
+
+############
+# Packages #
+############
 @login_required
-def media_packages(request):
+def packages(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
         filterby = request.POST['filterby']
-        # Sanitize user input
         media_type = MediaType.objects.filter(name=filterby)    
         packages = Package.objects.filter(media_type=media_type)
     else:
         packages = Package.objects.all()
 
-    if packages:
-        for package in packages:
-            package.url      = 'media/packages/' + str(package.id)
-            if has_permissions(request.user, 'edit_package', package.id)[0]:
-                package.can_edit = True
+    for package in packages:
+        package.url = 'packages/{0}'.format(package.id)
+
+        if has_permissions(request.user, 'package_edit', package.id)[0]:
+            package.can_edit = True
+
+        if has_permissions(request.user, 'package_delete', package.id)[0]:
+            package.can_delete = True
 
     context_dict['list'] = packages
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
-def media_package_add(request):
-    context, context_dict = base_request(request)
-
-    return render_to_response('frontend/item_add.html', context_dict, context)
-
-@login_required
-def media_package_view(request, package_id):
-    context, context_dict = base_request(request)
-
-    return render_to_response('frontend/item_view.html', context_dict, context)
-
-@login_required
-def media_package_edit(request, package_id):
+def package_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = MediaPackageForm(request.POST)
+        form = PackageForm(request.POST)
 
         if form.is_valid():
             form.save(commit=True)
-            return index(request)
-    else:
-        # Need to figure out here how to pre-fill a form
-        form = MediaPackageForm()
+            return redirect('/frontend/packages')
+    else: 
+        form = PackageForm()
 
     context_dict['form'] = form
-    return render_to_response('frontend/item_edit.html', context_dict, context)
+    return render_to_response('frontend/item_add.html', context_dict, context)
+
+@login_required
+def package_view(request, package_id):
+    context, context_dict = base_request(request)
+
+        
+    package, allowed, message = get_package_and_permissions(package_id, 'view')
+    package = Package.objects.get(id=package_id)
+
+    if package:
+        allowed, message = has_permissions(request.user, 'package_view', package)
+    else:
+        raise Http404
+
+    if allowed:
+        return render_to_response('frontend/item_view.html', context_dict, context)
+    else:
+        return render_to_response('frontend/access_denied.html', context_dict, context)
+
+@login_required
+def package_edit(request, package_id):
+    context, context_dict = base_request(request)
+
+    package = Package.objects.get(id=package_id)
+
+    if package:
+        allowed, message = has_permissions(request.user, 'package_edit', package)
+    else:
+        raise Http404
+
+    if allowed:
+        form = PackageForm(instance=package)
+
+        if request.method == 'POST':
+            form = PackageForm(request.POST)
+
+            if form.is_valid():
+                form.save(commit=True)
+                return redirect(base_url + 'packages/')
+
+        context_dict['form'] = form
+        return render_to_response('frontend/item_edit.html', context_dict, context)
+    else: 
+        render_to_response('frontend/access_denied.html', context_dict, context)
+
+def package_delete(request, package_id):
+    context, context_dict = base_request(request)
+
+    package = Package.objects.get(id=package_id)
+
+    if package:
+        allowed, message = has_permissions(request.user, 'package_delete', package)
+    else:
+        raise Http404
+
+    if allowed:
+        media_package.delete()
+        redirect('/frontned/packages')
+    else:
+        return render_to_response('frontend/access_denied.html', context_dict, context)
+
 
 ##################
 # Client Section #
