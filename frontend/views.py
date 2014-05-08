@@ -15,7 +15,7 @@ from frontend.forms import ClientForm, MediaTypeForm, PackageForm, JobForm
 ####################
 # Helper Functions #
 ####################
-def has_permissions(user, action, object_id):
+def has_permissions(user, action, object_name, object_instance):
     """
     Think about how I am going to implement permissions
     * Has someone online got a good method?
@@ -26,41 +26,54 @@ def has_permissions(user, action, object_id):
             * Has Content Restriction
             * Has Job Queue Restriction
             * Has Package Restriction
-
-    Permission Actions:
-    * view_client
-    * view_job
+    * What about permissions that don't involve objects... ?
     """
+
     allowed = (True, 'Allowed.')
     denied_not_super   = (False, 'You are not a Super User.')
     denied_not_allowed = (False, 'You are missing the required privileges.')
 
-    if action == 'view_client':
-        client = Client.objects.get(id=object_id)
-        if client and client.user == user:
-            return allowed
-            
     return allowed
     
-def get_package_and_permissions(package_id, action):
-    package = Package.objects.get(id=package_id)
+def get_package(user, object_id, action):
+    package = Package.objects.get(id=object_id)
 
     if package:
-        allowed, message = has_permissions(request.user, 'package_{0}'.format(action), media_type)
+        allowed, message = has_permissions(user, action, 'package', package)
     else:
         raise Http404
 
     return (package, allowed, message)
 
-def get_media_type_and_permissions(media_type_id, action):
-    media_type = MediaType.objects.get(id=media_type_id)
+def get_media_type(user, object_id, action):
+    media_type = MediaType.objects.get(id=object_id)
 
     if media_type:
-        allowed, message = has_permissions(request.user, 'media_type_{0}'.format(action), media_type)
+        allowed, message = has_permissions(user, action, 'media_type', media_type)
     else:
         raise Http404
 
-    return (package, allowed, message)
+    return (media_type, allowed, message)
+
+def get_client(user, object_id, action):
+    client = Client.objects.get(id=object_id)
+
+    if client:
+        allowed, message = has_permissions(user, action, 'client', client)
+    else:
+        raise Http404
+
+    return (client, allowed, message)
+
+def get_job(user, object_id, action):
+    job = Job.objects.get(id=object_id)
+
+    if job:
+        allowed, message = has_permissions(user, action, 'job', job)
+    else:
+        raise Http404
+
+    return (job, allowed, message)
 
 
 #################
@@ -137,21 +150,16 @@ def media_type_add(request):
 def media_type_view(request, media_type_id):
     context, context_dict = base_request(request)
 
-    media_type = MediaType.objects.get(id = media_type_id)
+    media_type, allowed, message = get_media_type(request.user, media_type_id, 'view')
 
-    if not media_type:
-        raise Http404
-
+    context_dict['item'] = media_type
     return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
 def media_type_edit(request, media_type_id):
     context, context_dict = base_request(request)
 
-    media_type = MediaType.objects.get(id = media_type_id)
-
-    if not media_type:
-        raise Http404
+    media_type, allowed, message = get_media_type(request.user, media_type_id, 'edit')
 
     return render_to_response('frontend/item_edit.html', context_dict, context)
 
@@ -159,33 +167,14 @@ def media_type_edit(request, media_type_id):
 def media_type_delete(request, media_type_id):
     context, context_dict = base_request(request)
 
-    media_type = MediaType.objects.get(id = media_type_id)
+    media_type, allowed, message = get_media_type(request.user, media_type_id, 'delete')
 
-    if not media_type:
-        raise Http404
-
-    return render_to_response('frontend/item_delete.html', context_dict, context)
-
-
-#####################
-# Package Discovery #
-#####################
-@login_required
-def media_discover(request):
-    context, context_dict = base_request(request)
-
-    return render_to_response('frontend/media_discover.html', context_dict, context)
-
-@login_required
-def media_discover_client(request, client_id):
-    context, context_dict = base_request(request)
-
-    client = Client.objects.get(id=client_id)
-
-    if not client:
-        raise Http404
-
-    return render_to_response('frontend/media_discover_client.html', context_dict, context)
+    if allowed:
+        media_type.delete()
+        redirect('/frontend/media_types')
+    else:
+        context_dict['message'] = message
+        return render_to_response('frontend/access_denied.html', context_dict, context)
 
 
 ############
@@ -234,30 +223,20 @@ def package_add(request):
 def package_view(request, package_id):
     context, context_dict = base_request(request)
 
-        
-    package, allowed, message = get_package_and_permissions(package_id, 'view')
-    package = Package.objects.get(id=package_id)
-
-    if package:
-        allowed, message = has_permissions(request.user, 'package_view', package)
-    else:
-        raise Http404
+    package, allowed, message = get_package(request.user, package_id, 'view')
 
     if allowed:
+        context_dict['item'] = package
         return render_to_response('frontend/item_view.html', context_dict, context)
     else:
+        context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
 @login_required
 def package_edit(request, package_id):
     context, context_dict = base_request(request)
 
-    package = Package.objects.get(id=package_id)
-
-    if package:
-        allowed, message = has_permissions(request.user, 'package_edit', package)
-    else:
-        raise Http404
+    package, allowed, message = get_package(request.user, package_id, 'edit')
 
     if allowed:
         form = PackageForm(instance=package)
@@ -272,22 +251,19 @@ def package_edit(request, package_id):
         context_dict['form'] = form
         return render_to_response('frontend/item_edit.html', context_dict, context)
     else: 
+        context_dict['message'] = message
         render_to_response('frontend/access_denied.html', context_dict, context)
 
 def package_delete(request, package_id):
     context, context_dict = base_request(request)
 
-    package = Package.objects.get(id=package_id)
-
-    if package:
-        allowed, message = has_permissions(request.user, 'package_delete', package)
-    else:
-        raise Http404
+    package, allowed, message = get_package(request.user, package_id, 'delete')
 
     if allowed:
         media_package.delete()
         redirect('/frontned/packages')
     else:
+        context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
 
@@ -299,10 +275,11 @@ def clients(request):
     context, context_dict = base_request(request)
 
     clients = Client.objects.all()
+
     for client in clients:
         client.url  = 'clients/{0}/'.format(client.id)
-        if has_permissions(request.user, 'edit_client', client.id)[0]:
-            client.can_edit = True
+        # TODO: Client edit permissions (can_edit)
+        # TODO: Client delete permissions (can_delete)
 
     context_dict['list'] = clients
     return render_to_response('frontend/list_view.html', context_dict, context)
@@ -327,15 +304,10 @@ def client_add(request):
 def client_view(request, client_id):
     context, context_dict = base_request(request)
     
-    client = Client.objects.get(id=client_id)
-
-    if client:
-        allowed, message = has_permissions(request.user, 'view_client', client_id)
-    else:
-        raise Http404
+    client, allowed, message = get_client(request.user, client_id, 'view')
 
     if allowed:
-        context_dict['item'] = Client
+        context_dict['item'] = client
         return render_to_response('frontend/item_view.html', context_dict, context)
     else:
         context_dict['message'] = message
@@ -345,6 +317,12 @@ def client_view(request, client_id):
 def client_edit(request, client_id):
     context, context_dict = base_request(request)
 
+    client, allowed, message = get_client(request.user, client_id, 'edit')
+
+    if not allowed:
+        context_dict['message'] = message
+        return render_to_response('frontend/access_denied.html', context_dict, context)
+
     if request.method == 'POST':
         form = ClientForm(request.POST)
 
@@ -352,11 +330,25 @@ def client_edit(request, client_id):
             form.save(commit=True)
             return index(request)
     else:
-        # Need to figure out here how to pre-fill a form
-        form = ClientForm()
+        form = ClientForm(instance=client)
 
     context_dict['form'] = form
     return render_to_response('frontend/item_edit.html', context_dict, context)
+
+@login_required
+def client_delete(request, client_id):
+    context, context_dict = base_request(request)
+
+    client, allowed, message = get_client(request.user, client_id, 'edit')
+
+    if allowed:
+        client.delete()
+        redirect('/frontend/clients/')
+        return render_to_response('frontend/item_delete.html', context_dict, context)
+    else:
+        context_dict['message'] = message
+        return render_to_response('frontend/access_denied.html', context_dict, context)
+
 
 ###############
 # Job Section #
@@ -365,9 +357,15 @@ def client_edit(request, client_id):
 def jobs(request):
     context, context_dict = base_request(request)
 
-    context_dict['list'] = Job.objects.filter(user=request.user) \
-                                      .filter(Q(state='PEND') | Q(state='PROG'))
+    jobs = Job.objects.filter(user=request.user) \
+                      .filter(Q(state='PEND') | Q(state='PROG'))
 
+    for job in jobs:
+        job.url = 'jobs/{0}'.format(job.id)
+        job.can_edit = False
+        # TODO: Add in can_delete with permissions
+
+    context_dict['list'] = jobs
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -390,12 +388,7 @@ def job_add(request):
 def job_view(request, job_id):
     context, context_dict = base_request(request)
 
-    job  = Job.objects.get(id=job_id)
-
-    if job:
-        allowed, message = has_permissions(request.user, 'view_job', job_id)
-    else:
-        raise Http404
+    job, allowed, message = get_job(request.user, job_id, 'view')
 
     if allowed:
         context_dict['item'] = Job
@@ -405,6 +398,21 @@ def job_view(request, job_id):
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
 @login_required
+def job_delete(request, job_id):
+    context, context_dict = base_request(request)
+
+    job, allowed, message = get_job(request.user, job_id, 'delete')
+
+    if allowed:
+        return render_to_response('frontend/item_delete.html', context_dict, context)
+    else:
+        context_dict['message'] = message
+        return render_to_response('frontend/access_denied.html', context_dict, context)
+
+###############
+# Job History #
+###############
+@login_required
 def job_history(request):
     context, context_dict = base_request(request)
 
@@ -413,26 +421,48 @@ def job_history(request):
 
     for job in jobs:
         job.url = 'jobs/{0}'.format(job.id)
+        job.can_edit   = False
+        job.can_delete = False
 
+    context_dict['list'] = jobs
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def job_history_client(request, client_id):
     context, context_dict = base_request(request)
 
-    client = Client.objects.get(id=client_id)
-
-    if client:
-        allowed, message = has_permissions(request.user, 'view_client', client_id)
-    else:
-        raise Http404
+    client, allowed, message = get_client(request.user, client_id, 'view')
 
     if allowed:
-        context_dict['list'] = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
+        jobs = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
                                           .filter(Q(state='COMP') | Q(state='FAIL'))
+
+        for job in jobs:
+            job.url = 'jobs/{0}'.format(job.id)
+            job.can_edit   = False
+            job.can_delete = False
+
+        context_dict['list'] = jobs
         return render_to_response('frontend/list_view.html', context_dict, context)
     else:
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
+
+#####################
+# Package Discovery #
+#####################
+@login_required
+def discover(request):
+    context, context_dict = base_request(request)
+
+    return render_to_response('frontend/media_discover.html', context_dict, context)
+
+@login_required
+def discover_client(request, client_id):
+    context, context_dict = base_request(request)
+
+    client, allowed, message = get_client(request.user, client_id, 'edit')
+
+    return render_to_response('frontend/media_discover_client.html', context_dict, context)
 
