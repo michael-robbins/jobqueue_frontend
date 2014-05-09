@@ -85,6 +85,14 @@ def base_request(request):
 
     context_dict['base_url'] = '/frontend'
 
+    # TODO: Cache this shit...
+    media_types = MediaType.objects.all()
+
+    for media_type in media_types:
+        media_type.url = 'packages/?filter={0}'.format(media_type.name)
+
+    context_dict['media_types'] = media_types
+
     return context, context_dict
 
 @login_required
@@ -138,6 +146,13 @@ def profile(request):
 def media_types(request):
     context, context_dict = base_request(request)
 
+    media_types = MediaType.objects.all()
+
+    for media_type in media_types:
+        media_type.url  = 'media_types/{0}'.format(media_type.name)
+
+    context_dict['list_name'] = 'Media Types'
+    context_dict['list'] = media_types
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -184,22 +199,28 @@ def media_type_delete(request, media_type_id):
 def packages(request):
     context, context_dict = base_request(request)
 
-    if request.method == 'POST':
-        filterby = request.POST['filterby']
-        media_type = MediaType.objects.filter(name=filterby)    
-        packages = Package.objects.filter(media_type=media_type)
+    if request.method == 'GET' and 'filter' in request.GET:
+        filterby = request.GET['filter']
+        
+        media_type = MediaType.objects.filter(name=filterby)
+
+        if media_type:
+            packages = Package.objects.filter(media_type=media_type)
+        else:
+            packages = Package.objects.all()
     else:
         packages = Package.objects.all()
 
     for package in packages:
         package.url = 'packages/{0}'.format(package.id)
 
-        if has_permissions(request.user, 'package_edit', package.id)[0]:
+        if has_permissions(request.user, 'edit',   'package', package)[0]:
             package.can_edit = True
 
-        if has_permissions(request.user, 'package_delete', package.id)[0]:
+        if has_permissions(request.user, 'delete', 'package', package)[0]:
             package.can_delete = True
 
+    context_dict['list_name'] = 'Media Packages'
     context_dict['list'] = packages
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -281,6 +302,7 @@ def clients(request):
         # TODO: Client edit permissions (can_edit)
         # TODO: Client delete permissions (can_delete)
 
+    context_dict['list_name'] = 'Clients'
     context_dict['list'] = clients
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -349,6 +371,14 @@ def client_delete(request, client_id):
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
+@login_required
+def client_discovery(request, client_id):
+    context, context_dict = base_request(request)
+
+    client, allowed, message = get_client(request.user, client_id, 'edit')
+
+    return render_to_response('frontend/client_discovery.html', context_dict, context)
+
 
 ###############
 # Job Section #
@@ -361,10 +391,12 @@ def jobs(request):
                       .filter(Q(state='PEND') | Q(state='PROG'))
 
     for job in jobs:
+        job.name = str(job)
         job.url = 'jobs/{0}'.format(job.id)
         job.can_edit = False
         # TODO: Add in can_delete with permissions
 
+    context_dict['list_name'] = 'Your Job Queue'
     context_dict['list'] = jobs
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -447,22 +479,3 @@ def job_history_client(request, client_id):
     else:
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
-
-
-#####################
-# Package Discovery #
-#####################
-@login_required
-def discover(request):
-    context, context_dict = base_request(request)
-
-    return render_to_response('frontend/media_discover.html', context_dict, context)
-
-@login_required
-def discover_client(request, client_id):
-    context, context_dict = base_request(request)
-
-    client, allowed, message = get_client(request.user, client_id, 'edit')
-
-    return render_to_response('frontend/media_discover_client.html', context_dict, context)
-

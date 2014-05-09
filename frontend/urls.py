@@ -7,9 +7,6 @@ urlpatterns = patterns(''
         , url(r'^logout/$', views.user_logout)
         , url(r'^profile/$', views.profile)
 
-        , url(r'^discover/$', views.media_discover)
-        , url(r'^discover/(?P<client_id>\d+)/$', views.media_discover_client)
-
         , url(r'^media_types/$', views.media_types)
         , url(r'^media_types/add/$', views.media_type_add)
         , url(r'^media_types/(?P<media_type_id>\d+)/$', views.media_type_view)
@@ -27,6 +24,7 @@ urlpatterns = patterns(''
         , url(r'^clients/(?P<client_id>\d+)/$', views.client_view)
         , url(r'^clients/(?P<client_id>\d+)/edit/$', views.client_edit)
         , url(r'^clients/(?P<client_id>\d+)/delete/$', views.client_delete)
+        , url(r'^clients/(?P<client_id>\d+)/discovery/$', views.client_discovery)
 
         , url(r'^jobs/$', views.jobs)
         , url(r'^jobs/add/$', views.job_add)

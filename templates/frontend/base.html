@@ -25,20 +25,18 @@
                        <ul class="nav pull-right">
                            {% if user.is_authenticated %}
                            <li class="navbar-text">Welcome, {{ user.username }}!</li>
-                           <li><a href="{{ base_url }}/profile/">Profile</a></li>
-                           <li><a href="{{ base_url }}/logout/">Logout</a></li>
+                           <li><a href="{{base_url}}/profile/">Profile</a></li>
+                           <li><a href="{{base_url}}/logout/">Logout</a></li>
                            {% else %}
-                           <li><a href="{{ base_url }}/login/">Login</a></li>
+                           <li><a href="{{base_url}}/login/">Login</a></li>
                            {% endif %}
                        </ul>
                        <ul class="nav">
                            {% if user.is_authenticated %}
-                           <li><a href="{{ base_url }}/media/packages/">View Media</a></li>
-                           <li><a href="{{ base_url }}/media/types/">Media Types</a></li>
-                           <li><a href="{{ base_url }}/media/discover/">Discover Media</a></li>
-                           <li><a href="{{ base_url }}/clients/">Clients</a></li>
-                           <li><a href="{{ base_url }}/jobs/">Jobs</a></li>
-                           <li><a href="{{ base_url }}/about/">About</a></li>
+                           <li><a href="{{base_url}}/jobs/">Job Queue</a></li>
+                           <li><a href="{{base_url}}/packages/">View Media</a></li>
+                           <li><a href="{{base_url}}/media_types/">Media Types</a></li>
+                           <li><a href="{{base_url}}/clients/">Clients</a></li>
                            {% endif %}
                        </ul>
                    </div>
@@ -55,8 +53,14 @@
                         {% endblock %}
                         <div id="types">
                             {% if media_types %}
-                            <ul class="nav nav-list"><li>Media Types</li></ul>
-                            {% include "frontend/media_type_list.html" with media_types=media_types %}
+                            <ul class="nav nav-list">
+                                <li>Media Types</li>
+                            {% for media_type in media_types %}
+                                <li><a href="{{base_url}}/{{media_type.url}}">{{media_type.name}}</a></li>
+                            {% endfor %}
+                            </ul>
+                            {% else %}
+                            <h3>There are no Media Types configured</h3>
                             {% endif %}
                         </div>
                     </div>
