@@ -37,7 +37,7 @@ def has_permissions(user, action, object_name, object_instance):
 
 # TODO: Figure out how to turn all below into a single function
 def get_package(user, context_dict, context, object_id, action):
-    package = get_object_or_404(Pakage, id=object_id)
+    package = get_object_or_404(Package, id=object_id)
 
     allowed, message = has_permissions(user, action, 'package', package)
 
@@ -135,6 +135,7 @@ def user_login(request):
 @login_required
 def user_logout(request):
     logout(request)
+
     return redirect(context_dict['base_url'])
 
 @login_required
@@ -164,6 +165,7 @@ def categories(request):
 
     context_dict['list_name'] = 'Categories'
     context_dict['list'] = categories
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -179,8 +181,11 @@ def category_add(request):
     else:
         form = CategoryForm()
 
-    context_dict['form'] = form
-    return render_to_response('frontend/item_add.html', context_dict, context)
+    context_dict['item_name'] = 'Add New Category'
+    context_dict['url_post']  = 'categories/add/'
+    context_dict['form']      = form
+
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def category_edit(request, category_id):
@@ -197,8 +202,11 @@ def category_edit(request, category_id):
     else:
         form = CategoryForm(instance=category)
 
-    context_dict['form'] = form
-    return render_to_response('frontend/item_edit.html', context_dict, context)
+    context_dict['item_name'] = 'Edit Category'
+    context_dict['url_post']  = 'categories/{0}/edit/'.format(category.id)
+    context_dict['form']      = form
+
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def category_delete(request, category_id):
@@ -240,6 +248,7 @@ def packages(request):
 
     context_dict['list_name'] = 'Media Packages'
     context_dict['list'] = packages
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -255,8 +264,11 @@ def package_add(request):
     else: 
         form = PackageForm()
 
-    context_dict['form'] = form
-    return render_to_response('frontend/item_add.html', context_dict, context)
+    context_dict['item_name'] = 'Add New Package'
+    context_dict['url_post']  = 'packages/add/'
+    context_dict['form']      = form
+
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def package_view(request, package_id):
@@ -265,6 +277,7 @@ def package_view(request, package_id):
     package = get_package(request.user, context_dict, context, package_id, 'view')
 
     context_dict['item'] = package
+
     return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
@@ -282,8 +295,11 @@ def package_edit(request, package_id):
     else:
         form = PackageForm(instance=package)
 
-    context_dict['form'] = form
-    return render_to_response('frontend/item_edit.html', context_dict, context)
+    context_dict['item_name'] = 'Edit Package'
+    context_dict['url_post']  = 'packages/{0}/edit/'.format(package.id)
+    context_dict['form']      = form
+
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 def package_delete(request, package_id):
     context, context_dict = base_request(request)
@@ -315,6 +331,7 @@ def clients(request):
 
     context_dict['list_name'] = 'Clients'
     context_dict['list'] = clients
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -330,8 +347,11 @@ def client_add(request):
     else:
         form = ClientForm()
 
-    context_dict['form'] = form
-    return render_to_response('frontend/item_add.html', context_dict, context)
+    context_dict['item_name'] = 'Add New Client'
+    context_dict['url_post']  = 'clients/add/'
+    context_dict['form']      = form
+
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def client_view(request, client_id):
@@ -339,7 +359,9 @@ def client_view(request, client_id):
     
     client = get_client(request.user, context_dict, context, client_id, 'view')
 
-    context_dict['item'] = client
+    context_dict['item_name'] = 'Client'
+    context_dict['item']      = client
+
     return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
@@ -357,8 +379,11 @@ def client_edit(request, client_id):
     else:
         form = ClientForm(instance=client)
 
-    context_dict['form'] = form
-    return render_to_response('frontend/item_edit.html', context_dict, context)
+    context_dict['item_name'] = 'Edit Client'
+    context_dict['url_post']  = 'clients/{0}/edit/'.format(client.id)
+    context_dict['form']      = form
+
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def client_delete(request, client_id):
@@ -397,6 +422,7 @@ def jobs(request):
 
     context_dict['list_name'] = 'Your Job Queue'
     context_dict['list'] = jobs
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -412,8 +438,11 @@ def job_add(request):
     else:
         form = JobForm()
 
-    context_dict['form'] = form
-    return render_to_response('frontend/item_add.html', context_dict, context)
+    context_dict['item_name'] = 'Add New Job'
+    context_dict['url_post']  = 'jobs/add/'
+    context_dict['form']      = form
+
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def job_view(request, job_id):
@@ -421,7 +450,9 @@ def job_view(request, job_id):
 
     job = get_job(request.user, context_dict, context, job_id, 'view')
 
+    context_dict['item_name'] = 'Job'
     context_dict['item'] = job
+
     return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
@@ -448,7 +479,9 @@ def job_history(request):
         job.can_edit   = False
         job.can_delete = False
 
-    context_dict['list'] = jobs
+    context_dict['list_name'] = 'Your Job History'
+    context_dict['list']      = jobs
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -465,5 +498,7 @@ def job_history_client(request, client_id):
         job.can_edit   = False
         job.can_delete = False
 
-    context_dict['list'] = jobs
+    context_dict['list_name'] = 'Client Job History'
+    context_dict['list']      = jobs
+
     return render_to_response('frontend/list_view.html', context_dict, context)
