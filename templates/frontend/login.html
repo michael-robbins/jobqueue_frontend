@@ -2,11 +2,12 @@
 
 {% block body_block %}
 <div class="hero-unit">
-    <h1>Login to Frontend</h1>
+    <h1>Welcome to the Frontend</h1>
+    <p></p>
 
     <div class="container">
         <form class="form-signin span4" id="login_form" method="post" action="/frontend/login/">
-            <h2 class="form-signin-heading">Please sign in</h2>
+            <h3 class="form-signin-heading">Please sign in</h3>
             {% csrf_token %}
 
             {% if bad_details %}

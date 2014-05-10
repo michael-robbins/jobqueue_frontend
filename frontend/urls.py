@@ -7,11 +7,10 @@ urlpatterns = patterns(''
         , url(r'^logout/$', views.user_logout)
         , url(r'^profile/$', views.profile)
 
-        , url(r'^media_types/$', views.media_types)
-        , url(r'^media_types/add/$', views.media_type_add)
-        , url(r'^media_types/(?P<media_type_id>\d+)/$', views.media_type_view)
-        , url(r'^media_types/(?P<media_type_id>\d+)/edit/$', views.media_type_edit)
-        , url(r'^media_types/(?P<media_type_id>\d+)/edit/$', views.media_type_delete)
+        , url(r'^categories/$', views.categories)
+        , url(r'^categories/add/$', views.category_add)
+        , url(r'^categories/(?P<category_id>\d+)/edit/$', views.category_edit)
+        , url(r'^categories/(?P<category_id>\d+)/delete/$', views.category_delete)
 
         , url(r'^packages/$', views.packages)
         , url(r'^packages/add/$', views.package_add)

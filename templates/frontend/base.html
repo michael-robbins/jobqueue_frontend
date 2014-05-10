@@ -35,7 +35,7 @@
                            {% if user.is_authenticated %}
                            <li><a href="{{base_url}}/jobs/">Job Queue</a></li>
                            <li><a href="{{base_url}}/packages/">View Media</a></li>
-                           <li><a href="{{base_url}}/media_types/">Media Types</a></li>
+                           <li><a href="{{base_url}}/categories/">Categories</a></li>
                            <li><a href="{{base_url}}/clients/">Clients</a></li>
                            {% endif %}
                        </ul>
@@ -46,25 +46,24 @@
         </div>
 
             <div class="container-fluid">
+            <div class="row-fluid">&nbsp;</div>
             <div class="row-fluid">
                 <div class="span1"></div>
                 <div class="span2">
+                    {% if user.is_authenticated %}
                     <div class="well sidebar-nav">
-                        {% block sidebar %}
-                        {% endblock %}
-                        <div id="types">
-                            {% if media_types %}
-                            <ul class="nav nav-list">
-                                <li>Media Types</li>
-                            {% for media_type in media_types %}
-                                <li><a href="{{base_url}}/{{media_type.url}}">{{media_type.name}}</a></li>
+                        {% if categories %}
+                        <ul class="nav nav-list">
+                            <li>Categories</li>
+                            {% for category in categories %}
+                            <li><a href="{{base_url}}/{{category.url}}">{{category.name}}</a></li>
                             {% endfor %}
-                            </ul>
-                            {% else %}
-                            <h3>There are no Media Types configured</h3>
-                            {% endif %}
-                        </div>
+                        </ul>
+                        {% else %}
+                        <h3>There are no Categories configured.</h3>
+                        {% endif %}
                     </div>
+                    {% endif %}
                 </div>
                 <div class="span7">
                     {% block body_block %}

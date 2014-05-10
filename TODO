@@ -20,7 +20,7 @@
         * Each User has a ForeignKey attribute tied to the Client table
         * If a User has no tied Client, then we allow them to see (ALL/NONE) jobs?
         * If a User is a superuser they can see ALL jobs in the system
-    * 'Media Types' page
+    * 'Categories' page
         * Limit to just Super Users
     * 'Discover Media' page
         * Should this be restricted on a per-user/client basis?

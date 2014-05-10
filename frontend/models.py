@@ -27,7 +27,7 @@ class Client(models.Model):
     def __str__(self):
         return self.name
 
-class MediaType(models.Model):
+class Category(models.Model):
     name          = models.CharField(max_length=32,  blank=False)
     relative_path = models.CharField(max_length=256, blank=False)
 
@@ -40,7 +40,7 @@ class Package(models.Model):
     date_created  = models.DateTimeField(auto_now_add=True)
     metadata      = models.TextField(blank=False, default='')
 
-    media_type     = models.ForeignKey(MediaType)
+    category       = models.ForeignKey(Category)
     parent_package = models.ForeignKey('self', null=True)
 
     def __str__(self):

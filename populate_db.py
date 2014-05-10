@@ -9,12 +9,12 @@ def populate():
     test_client_2 = add_Client(name='Test Client #2', host_username='test', host_hostname='testhost2'
                             , host_port=22, base_path='/data/media/', user=test_user_1)
 
-    movie_media_type = add_MediaType('Movies', 'movies/')
-    tv_media_type    = add_MediaType('TV Episodes', 'tv/')
+    movie_category = add_Category('Movies', 'movies/')
+    tv_category    = add_Category('TV Episodes', 'tv/')
 
-    movie_package   = add_Package('Movie #1', 'Movie 1 (2009)/', movie_media_type, None)
-    tv_base_package = add_Package('TV Show 1 - Base', 'TV Show 1/', tv_media_type, None)
-    tv_s1_package   = add_Package('TV Show 1 - S1'  , 'Season 1/', tv_media_type, None)
+    movie_package   = add_Package('Movie #1', 'Movie 1 (2009)/', movie_category, None)
+    tv_base_package = add_Package('TV Show 1 - Base', 'TV Show 1/', tv_category, None)
+    tv_s1_package   = add_Package('TV Show 1 - S1'  , 'Season 1/', tv_category, None)
 
     movie_file_1 = add_File(
                     'Test Movie (2009).mkv'
@@ -57,13 +57,13 @@ def add_Client(name, host_username, host_hostname, host_port, base_path, user):
                         , host_hostname=host_hostname, host_port=host_port, base_path=base_path, user=user)[0]
     return c
 
-def add_MediaType(name, relative_path):
-    m = MediaType.objects.get_or_create(name=name, relative_path=relative_path)[0]
+def add_Category(name, relative_path):
+    m = Category.objects.get_or_create(name=name, relative_path=relative_path)[0]
     return m
 
-def add_Package(name, relative_path, media_type, parent_package):
+def add_Package(name, relative_path, category, parent_package):
     p = Package.objects.get_or_create(name=name, relative_path=relative_path
-                        , media_type=media_type, parent_package=parent_package)[0]
+                        , category=category, parent_package=parent_package)[0]
     return p
 
 def add_File(relative_path, file_hash, package):

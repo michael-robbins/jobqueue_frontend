@@ -8,9 +8,9 @@ from django.contrib.auth.decorators import login_required
 
 from django.db.models import Q
 
-from frontend.models import Client, MediaType, Job, Package, File, ClientPackageAvailability
+from frontend.models import Client, Category, Job, Package, File, ClientPackageAvailability
 
-from frontend.forms import ClientForm, MediaTypeForm, PackageForm, JobForm
+from frontend.forms import ClientForm, CategoryForm, PackageForm, JobForm
 
 ####################
 # Helper Functions #
@@ -34,7 +34,8 @@ def has_permissions(user, action, object_name, object_instance):
     denied_not_allowed = (False, 'You are missing the required privileges.')
 
     return allowed
-    
+
+# TODO: Figure out how to turn all below into a single function
 def get_package(user, context_dict, context, object_id, action):
     package = get_object_or_404(Pakage, id=object_id)
 
@@ -44,18 +45,18 @@ def get_package(user, context_dict, context, object_id, action):
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
-    return (package, allowed, message)
+    return package
 
-def get_media_type(user, context_dict, context, object_id, action):
-    media_type = get_object_or_404(MediaType, id=object_id)
+def get_category(user, context_dict, context, object_id, action):
+    category = get_object_or_404(Category, id=object_id)
 
-    allowed, message = has_permissions(user, action, 'media_type', media_type)
+    allowed, message = has_permissions(user, action, 'category', category)
 
     if not allowed:
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
-    return (media_type, allowed, message)
+    return category
 
 def get_client(user, context_dict, context, object_id, action):
     client = get_object_or_404(Client, id=object_id)
@@ -66,7 +67,7 @@ def get_client(user, context_dict, context, object_id, action):
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
-    return (client, allowed, message)
+    return client
 
 def get_job(user, context_dict, context, object_id, action):
     job = get_object_or_404(Job, id=object_id)
@@ -77,7 +78,7 @@ def get_job(user, context_dict, context, object_id, action):
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
-    return (job, allowed, message)
+    return job
 
 
 #################
@@ -87,15 +88,15 @@ def base_request(request):
     context = RequestContext(request)
     context_dict = dict()
 
-    context_dict['base_url'] = '/frontend'
+    context_dict['base_url'] = '/frontend/'
 
     # TODO: Cache this shit...
-    media_types = MediaType.objects.all()
+    categories = Category.objects.all()
 
-    for media_type in media_types:
-        media_type.url = 'packages/?filter={0}'.format(media_type.name)
+    for category in categories:
+        category.url = 'packages/?filter={0}'.format(category.name)
 
-    context_dict['media_types'] = media_types
+    context_dict['categories'] = categories
 
     return context, context_dict
 
@@ -123,7 +124,7 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return redirect(context_dict['base_url'] + '/' )
+                return redirect(context_dict['base_url'])
             else:
                 context_dict['disabled_account'] = True
         else:
@@ -134,7 +135,7 @@ def user_login(request):
 @login_required
 def user_logout(request):
     logout(request)
-    return redirect('/frontend/')
+    return redirect(context_dict['base_url'])
 
 @login_required
 def profile(request):
@@ -143,75 +144,70 @@ def profile(request):
     return render_to_response('frontend/profile.html', context_dict, context)
 
 
-###############
-# Media Types #
-###############
+##############
+# Categories #
+##############
 @login_required
-def media_types(request):
+def categories(request):
     context, context_dict = base_request(request)
 
-    media_types = MediaType.objects.all()
+    categories = Category.objects.all()
 
-    for media_type in media_types:
-        media_type.url  = 'media_types/{0}'.format(media_type.name)
+    for category in categories:
+        category.url = 'packages/?filter={0}'.format(category.name)
+        
+        if has_permissions(request.user, 'edit',   'category', category)[0]:
+            category.url_edit   = "categories/{0}/edit/".format(category.id)
 
-    context_dict['list_name'] = 'Media Types'
-    context_dict['list'] = media_types
+        if has_permissions(request.user, 'delete', 'category', category)[0]:
+            category.url_delete = "categories/{0}/delete/".format(category.id)
+
+    context_dict['list_name'] = 'Categories'
+    context_dict['list'] = categories
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
-def media_type_add(request):
+def category_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = MediaTypeFrom(request.POST)
+        form = CategoryFrom(request.POST)
 
         if form.is_valid():
-            form.save(commit=True)
-            redirect('/frontend/media_types')
+            form.save()
+            redirect(context_dict['base_url'] + 'categories/')
     else:
-        form = MediaTypeForm()
+        form = CategoryForm()
 
     context_dict['form'] = form
     return render_to_response('frontend/item_add.html', context_dict, context)
 
 @login_required
-def media_type_view(request, media_type_id):
+def category_edit(request, category_id):
     context, context_dict = base_request(request)
 
-    media_type = get_media_type(request.user, context_dict, context, media_type_id, 'view')
-
-    form = MediaTypeForm(instance=media_type)
-
-    context_dict['form'] = form
-    return render_to_response('frontend/item_view.html', context_dict, context)
-
-@login_required
-def media_type_edit(request, media_type_id):
-    context, context_dict = base_request(request)
-
-    media_type = get_media_type(request.user, context_dict, context, media_type_id, 'edit')
+    category = get_category(request.user, context_dict, context, category_id, 'edit')
 
     if request.method == 'POST':
-        form = MediaTypeForm(request.POST, instance=media_type)
+        form = CategoryForm(request.POST, instance=category)
 
         if form.is_valid():
-            form.save(commit=True)
-            redirect('/frontend/media_types')
+            form.save()
+            redirect(context_dict['base_url'] + 'categories/{0}/'.format(category.id))
     else:
-        form = MediaTypeForm(instance=media_type)
+        form = CategoryForm(instance=category)
 
     context_dict['form'] = form
     return render_to_response('frontend/item_edit.html', context_dict, context)
 
 @login_required
-def media_type_delete(request, media_type_id):
+def category_delete(request, category_id):
     context, context_dict = base_request(request)
 
-    media_type = get_media_type(request.user, context_dict, context, media_type_id, 'delete')
+    category = get_category(request.user, context_dict, context, category_id, 'delete')
+    category.delete()
 
-    media_type.delete()
-    return redirect('/frontend/media_types/')
+    return redirect(context_dict['base_url'] + 'categories/')
 
 
 ############
@@ -224,23 +220,23 @@ def packages(request):
     if request.method == 'GET' and 'filter' in request.GET:
         filterby = request.GET['filter']
         
-        media_type = MediaType.objects.filter(name=filterby)
+        category = Category.objects.filter(name=filterby)
 
-        if media_type:
-            packages = Package.objects.filter(media_type=media_type)
+        if category:
+            packages = Package.objects.filter(category=category)
         else:
             packages = Package.objects.all()
     else:
         packages = Package.objects.all()
 
     for package in packages:
-        package.url = 'packages/{0}'.format(package.id)
+        package.url = 'packages/{0}/'.format(package.id)
 
         if has_permissions(request.user, 'edit',   'package', package)[0]:
-            package.can_edit = True
+            package.url_edit   = "{0}edit/".format(package.url)
 
         if has_permissions(request.user, 'delete', 'package', package)[0]:
-            package.can_delete = True
+            package.url_delete = "{0}delete/".format(package.url)
 
     context_dict['list_name'] = 'Media Packages'
     context_dict['list'] = packages
@@ -254,8 +250,8 @@ def package_add(request):
         form = PackageForm(request.POST)
 
         if form.is_valid():
-            form.save(commit=True)
-            return redirect('/frontend/packages/')
+            form.save()
+            return redirect(context_dict['base_url'] + 'packages/')
     else: 
         form = PackageForm()
 
@@ -281,8 +277,8 @@ def package_edit(request, package_id):
         form = PackageForm(request.POST, instance=package)
 
         if form.is_valid():
-            form.save(commit=True)
-            return redirect('/frontend/packages/')
+            form.save()
+            return redirect(context_dict['base_url'] + 'packages/{0}/'.format(package.id))
     else:
         form = PackageForm(instance=package)
 
@@ -293,9 +289,9 @@ def package_delete(request, package_id):
     context, context_dict = base_request(request)
 
     package = get_package(request.user, context_dict, context, package_id, 'delete')
-
     package.delete()
-    return redirect('/frontned/packages/')
+
+    return redirect(context_dict['base_url'] + 'packages/')
 
 
 ##################
@@ -309,8 +305,13 @@ def clients(request):
 
     for client in clients:
         client.url  = 'clients/{0}/'.format(client.id)
-        # TODO: Client edit permissions (can_edit)
-        # TODO: Client delete permissions (can_delete)
+
+        if has_permissions(request.user, 'edit',   'client', client)[0]:
+            client.url_edit     = "{0}edit/".format(client.url)
+            client.url_discover = "{0}discover/".format(client.url)
+
+        if has_permissions(request.user, 'delete', 'client', client)[0]:
+            client.url_delete = "{0}delete/".format(client.url)
 
     context_dict['list_name'] = 'Clients'
     context_dict['list'] = clients
@@ -324,8 +325,8 @@ def client_add(request):
         form = ClientForm(request.POST)
 
         if form.is_valid():
-            form.save(commit=True)
-            return index(request)
+            form.save()
+            return redirect(context_dict['base_url'] + 'clients/')
     else:
         form = ClientForm()
 
@@ -348,11 +349,11 @@ def client_edit(request, client_id):
     client = get_client(request.user, context_dict, context, client_id, 'edit')
 
     if request.method == 'POST':
-        form = ClientForm(request.POST)
+        form = ClientForm(request.POST, instance=client)
 
         if form.is_valid():
-            form.save(commit=True)
-            return index(request)
+            form.save()
+            return redirect(context_dict['base_url'] + 'clients/{0}/'.format(client.id))
     else:
         form = ClientForm(instance=client)
 
@@ -364,9 +365,9 @@ def client_delete(request, client_id):
     context, context_dict = base_request(request)
 
     client = get_client(request.user, context_dict, context, client_id, 'delete')
-
     client.delete()
-    return redirect('/frontend/clients/')
+
+    return redirect(context_dict['base_url'] + 'clients/')
 
 @login_required
 def client_discovery(request, client_id):
@@ -390,8 +391,9 @@ def jobs(request):
     for job in jobs:
         job.name = str(job)
         job.url = 'jobs/{0}'.format(job.id)
-        job.can_edit = False
-        # TODO: Add in can_delete with permissions
+
+        if has_permissions(request.user, 'delete', 'job', job)[0]:
+            job.url_delete = "{0}/delete/".format(job.url)
 
     context_dict['list_name'] = 'Your Job Queue'
     context_dict['list'] = jobs
@@ -405,8 +407,8 @@ def job_add(request):
         form = JobForm(request.POST)
 
         if form.is_valid():
-            form.save(commit=True)
-            return index(request)
+            form.save()
+            return redirect(context_dict['base_url'] + 'jobs/')
     else:
         form = JobForm()
 
@@ -419,7 +421,7 @@ def job_view(request, job_id):
 
     job = get_job(request.user, context_dict, context, job_id, 'view')
 
-    context_dict['item'] = Job
+    context_dict['item'] = job
     return render_to_response('frontend/item_view.html', context_dict, context)
 
 @login_required
@@ -427,9 +429,9 @@ def job_delete(request, job_id):
     context, context_dict = base_request(request)
 
     job = get_job(request.user, context_dict, context, job_id, 'delete')
-
     job.delete()
-    return redirect('/frontend/jobs/')
+
+    return redirect(context_dict['base_url'] + 'jobs/')
 
 ###############
 # Job History #
