@@ -1,0 +1,11 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+{% load django_tables2 %}
+
+{% block body_block %}
+<div class="jumbotron">
+    <h2>{{list_name}}</h2>
+    
+    {% render_table table %}
+</div>
+{% endblock %}

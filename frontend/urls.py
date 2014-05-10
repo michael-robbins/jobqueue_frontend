@@ -23,7 +23,7 @@ urlpatterns = patterns(''
         , url(r'^clients/(?P<client_id>\d+)/$', views.client_view)
         , url(r'^clients/(?P<client_id>\d+)/edit/$', views.client_edit)
         , url(r'^clients/(?P<client_id>\d+)/delete/$', views.client_delete)
-        , url(r'^clients/(?P<client_id>\d+)/discovery/$', views.client_discovery)
+        , url(r'^clients/(?P<client_id>\d+)/discover/$', views.client_discover)
 
         , url(r'^jobs/$', views.jobs)
         , url(r'^jobs/add/$', views.job_add)

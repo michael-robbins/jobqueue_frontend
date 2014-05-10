@@ -1,12 +1,12 @@
 {% extends 'frontend/base.html' %}
 
 {% block body_block %}
-<div class="hero-unit">
+<div class="jumbotron">
     <h1>Welcome to the Frontend</h1>
     <p></p>
 
     <div class="container">
-        <form class="form-signin span4" id="login_form" method="post" action="/frontend/login/">
+        <form class="form-signin col-md-4" id="login_form" method="post" action="/frontend/login/">
             <h3 class="form-signin-heading">Please sign in</h3>
             {% csrf_token %}
 
@@ -16,9 +16,9 @@
             <p><strong>Your account is currently disabled!</strong></p>
             {% endif %}
 
-            Username: <input type="text" class="input-block-level" placeholder="Username" name="username" value="" size="50" />
+            Username: <input type="text" class="form-control" placeholder="Username" name="username" value="" size="50" />
             <br />
-            Password: <input type="password" class="input-block-level" placeholder="Password" name="password" value="" size="50" />
+            Password: <input type="password" class="form-control" placeholder="Password" name="password" value="" size="50" />
             <br />
             <button class="btn btn-primary" type="submit">Sign in</button>
         </form>

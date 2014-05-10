@@ -11,10 +11,15 @@ from django.db.models import Q
 from frontend.models import Client, Category, Job, Package, File, ClientPackageAvailability
 
 from frontend.forms import ClientForm, CategoryForm, PackageForm, JobForm
+from frontend.tables import ClientTable
 
 ####################
 # Helper Functions #
 ####################
+edit_icon     = '<i class="glyphicon glyphicon-edit">'
+delete_icon   = '<i class="glyphicon glyphicon-remove">'
+discover_icon = '<i class="glyphicon glyphicon-search">'
+
 def has_permissions(user, action, object_name, object_instance):
     """
     Think about how I am going to implement permissions
@@ -80,6 +85,15 @@ def get_job(user, context_dict, context, object_id, action):
 
     return job
 
+def table_header(name, edit=False, delete=False, discover=False):
+    row = list()
+
+    row.append({'name': name})
+    if edit:     row.append({'name': 'Edit'})
+    if delete:   row.append({'name': 'Delete'})
+    if discover: row.append({'name': 'Discover'})
+
+    return row
 
 #################
 # Generic Views #
@@ -319,18 +333,50 @@ def clients(request):
 
     clients = Client.objects.all()
 
-    for client in clients:
-        client.url  = 'clients/{0}/'.format(client.id)
+    table = ClientTable(clients)
+    context_dict['table'] = table
+    context_dict['list_name'] = 'Clients'
+    return render_to_response('frontend/list_view2.html', context_dict, context)
 
-        if has_permissions(request.user, 'edit',   'client', client)[0]:
-            client.url_edit     = "{0}edit/".format(client.url)
-            client.url_discover = "{0}discover/".format(client.url)
+    context_dict['list_head'] = list()
+
+    row = table_header('Client Name', edit=True, delete=True, discover=True)
+    context_dict['list_head'].append(row)
+
+    context_dict['list_body'] = list()
+
+    for client in clients:
+        client.url = 'clients/{0}/'.format(client.id)
+        client.url_edit = "{0}edit/".format(client.url)
+        client.url_delete = "{0}delete/".format(client.url)
+        client.url_discover = "{0}discover/".format(client.url)
+
+        row = list()
+
+        row.append({'is_link': True, 'url': client.url, 'name': client})
+
+        can_edit     = False
+        can_delete   = False
+        can_discover = False
+
+        if has_permissions(request.user, 'edit', 'client', client)[0]:
+            can_edit     = True
+            can_discover = True
 
         if has_permissions(request.user, 'delete', 'client', client)[0]:
-            client.url_delete = "{0}delete/".format(client.url)
+            can_delete = True
+        
+        def i(allowed, append):
+            if allowed:
+                return append
+            else:
+                return {'name': ''}
 
-    context_dict['list_name'] = 'Clients'
-    context_dict['list'] = clients
+        row.append(i(can_edit, {'is_link': True,   'url': client.url_edit,     'name': edit_icon}))
+        row.append(i(can_delete, {'is_link': True, 'url': client.url_delete,   'name': delete_icon}))
+        row.append(i(can_edit, {'is_link': True,   'url': client.url_discover, 'name': discover_icon}))
+        print(row)
+        context_dict['list_body'].append(row)
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -395,12 +441,12 @@ def client_delete(request, client_id):
     return redirect(context_dict['base_url'] + 'clients/')
 
 @login_required
-def client_discovery(request, client_id):
+def client_discover(request, client_id):
     context, context_dict = base_request(request)
 
     client = get_client(request.user, context_dict, context, client_id, 'edit')
 
-    return render_to_response('frontend/client_discovery.html', context_dict, context)
+    return render_to_response('frontend/client_discover.html', context_dict, context)
 
 
 ###############
