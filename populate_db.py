@@ -1,4 +1,5 @@
 import os
+import time
 import datetime
 
 def populate():
@@ -86,9 +87,27 @@ def add_User(username):
     return u
 
 if __name__ == '__main__':
-    print("Starting population")
+    db_file = 'db.sqlite3'
+
+    print('Deleting DB and resyncdb\'ing in 10 seconds')
+    time.sleep(10)
+
+    try:
+        print('Starting: Deleting old DB')
+        os.remove(db_file)
+        print('Finished: Deleted old DB')
+    except OSError:
+        pass
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'frontend_project.settings')
     from frontend.models import *
     from django.contrib.auth.models import User
+    from django.core import management
+
+    print('Starting: syncdb')
+    management.call_command('syncdb')
+    print('Finished: syncdb')
+
+    print("Starting: population")
     populate()
-    print("Finished population")
+    print("Finished: population")
