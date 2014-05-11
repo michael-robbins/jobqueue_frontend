@@ -1,6 +1,6 @@
 from django.http      import HttpResponse, HttpResponseRedirect, Http404
 from django.template  import RequestContext
-from django.shortcuts import render_to_response, redirect, get_object_or_404
+from django.shortcuts import render, render_to_response, redirect, get_object_or_404
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -10,8 +10,8 @@ from django.db.models import Q
 
 from frontend.models import Client, Category, Job, Package, File, ClientPackageAvailability
 
-from frontend.forms import ClientForm, CategoryForm, PackageForm, JobForm
-from frontend.tables import ClientTable
+from frontend.forms  import ClientForm,  CategoryForm,  PackageForm,  JobForm
+from frontend.tables import ClientTable, CategoryTable, PackageTable, JobTable
 
 ####################
 # Helper Functions #
@@ -167,20 +167,12 @@ def categories(request):
     context, context_dict = base_request(request)
 
     categories = Category.objects.all()
-
-    for category in categories:
-        category.url = 'packages/?filter={0}'.format(category.name)
-        
-        if has_permissions(request.user, 'edit',   'category', category)[0]:
-            category.url_edit   = "categories/{0}/edit/".format(category.id)
-
-        if has_permissions(request.user, 'delete', 'category', category)[0]:
-            category.url_delete = "categories/{0}/delete/".format(category.id)
-
+    
+    context_dict['table'] = CategoryTable(categories)
     context_dict['list_name'] = 'Categories'
-    context_dict['list'] = categories
 
-    return render_to_response('frontend/list_view.html', context_dict, context)
+    return render(request, 'frontend/list_view.html', context_dict)
+    #return render(request, 'frontend/list_view.html', context_dict, context)
 
 @login_required
 def category_add(request):
@@ -212,7 +204,7 @@ def category_edit(request, category_id):
 
         if form.is_valid():
             form.save()
-            redirect(context_dict['base_url'] + 'categories/{0}/'.format(category.id))
+            redirect(context_dict['base_url'] + 'categories/')
     else:
         form = CategoryForm(instance=category)
 
@@ -251,17 +243,8 @@ def packages(request):
     else:
         packages = Package.objects.all()
 
-    for package in packages:
-        package.url = 'packages/{0}/'.format(package.id)
-
-        if has_permissions(request.user, 'edit',   'package', package)[0]:
-            package.url_edit   = "{0}edit/".format(package.url)
-
-        if has_permissions(request.user, 'delete', 'package', package)[0]:
-            package.url_delete = "{0}delete/".format(package.url)
-
-    context_dict['list_name'] = 'Media Packages'
-    context_dict['list'] = packages
+    context_dict['table'] = PackageTable(packages)
+    context_dict['list_name'] = 'Packages'
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -305,7 +288,7 @@ def package_edit(request, package_id):
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'packages/{0}/'.format(package.id))
+            return redirect(context_dict['base_url'] + 'packages/')
     else:
         form = PackageForm(instance=package)
 
@@ -333,51 +316,8 @@ def clients(request):
 
     clients = Client.objects.all()
 
-    table = ClientTable(clients)
-    context_dict['table'] = table
+    context_dict['table'] = ClientTable(clients)
     context_dict['list_name'] = 'Clients'
-    return render_to_response('frontend/list_view2.html', context_dict, context)
-
-    context_dict['list_head'] = list()
-
-    row = table_header('Client Name', edit=True, delete=True, discover=True)
-    context_dict['list_head'].append(row)
-
-    context_dict['list_body'] = list()
-
-    for client in clients:
-        client.url = 'clients/{0}/'.format(client.id)
-        client.url_edit = "{0}edit/".format(client.url)
-        client.url_delete = "{0}delete/".format(client.url)
-        client.url_discover = "{0}discover/".format(client.url)
-
-        row = list()
-
-        row.append({'is_link': True, 'url': client.url, 'name': client})
-
-        can_edit     = False
-        can_delete   = False
-        can_discover = False
-
-        if has_permissions(request.user, 'edit', 'client', client)[0]:
-            can_edit     = True
-            can_discover = True
-
-        if has_permissions(request.user, 'delete', 'client', client)[0]:
-            can_delete = True
-        
-        def i(allowed, append):
-            if allowed:
-                return append
-            else:
-                return {'name': ''}
-
-        row.append(i(can_edit, {'is_link': True,   'url': client.url_edit,     'name': edit_icon}))
-        row.append(i(can_delete, {'is_link': True, 'url': client.url_delete,   'name': delete_icon}))
-        row.append(i(can_edit, {'is_link': True,   'url': client.url_discover, 'name': discover_icon}))
-        print(row)
-        context_dict['list_body'].append(row)
-
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -421,7 +361,7 @@ def client_edit(request, client_id):
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'clients/{0}/'.format(client.id))
+            return redirect(context_dict['base_url'] + 'clients/')
     else:
         form = ClientForm(instance=client)
 
@@ -459,15 +399,8 @@ def jobs(request):
     jobs = Job.objects.filter(user=request.user) \
                       .filter(Q(state='PEND') | Q(state='PROG'))
 
-    for job in jobs:
-        job.name = str(job)
-        job.url = 'jobs/{0}'.format(job.id)
-
-        if has_permissions(request.user, 'delete', 'job', job)[0]:
-            job.url_delete = "{0}/delete/".format(job.url)
-
-    context_dict['list_name'] = 'Your Job Queue'
-    context_dict['list'] = jobs
+    context_dict['table'] = JobTable(jobs)
+    context_dict['list_name'] = 'Job Queue'
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
