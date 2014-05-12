@@ -340,17 +340,6 @@ def client_add(request):
     return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
-def client_view(request, client_id):
-    context, context_dict = base_request(request)
-    
-    client = get_client(request.user, context_dict, context, client_id, 'view')
-
-    context_dict['item_name'] = 'Client'
-    context_dict['item']      = client
-
-    return render_to_response('frontend/item_view.html', context_dict, context)
-
-@login_required
 def client_edit(request, client_id):
     context, context_dict = base_request(request)
 
@@ -388,6 +377,20 @@ def client_discover(request, client_id):
 
     return render_to_response('frontend/client_discover.html', context_dict, context)
 
+@login_required
+def client_history(request, client_id):
+    context, context_dict = base_request(request)
+
+    client = get_client(request.user, context_dict, context, client_id, 'view')
+
+    jobs = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
+                      .filter(Q(state='COMP') | Q(state='FAIL'))
+
+    context_dict['table'] = JobTable(jobs)
+    context_dict['list_name'] = 'Client Job History'
+
+    return render_to_response('frontend/list_view.html', context_dict, context)
+
 
 ###############
 # Job Section #
@@ -423,7 +426,6 @@ def job_add(request):
 
     return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
-@login_required
 def job_view(request, job_id):
     context, context_dict = base_request(request)
 
@@ -434,7 +436,6 @@ def job_view(request, job_id):
 
     return render_to_response('frontend/item_view.html', context_dict, context)
 
-@login_required
 def job_delete(request, job_id):
     context, context_dict = base_request(request)
 
@@ -463,21 +464,3 @@ def job_history(request):
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
-@login_required
-def job_history_client(request, client_id):
-    context, context_dict = base_request(request)
-
-    client = get_client(request.user, context_dict, context, client_id, 'view')
-
-    jobs = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
-                      .filter(Q(state='COMP') | Q(state='FAIL'))
-
-    for job in jobs:
-        job.url = 'jobs/{0}'.format(job.id)
-        job.can_edit   = False
-        job.can_delete = False
-
-    context_dict['list_name'] = 'Client Job History'
-    context_dict['list']      = jobs
-
-    return render_to_response('frontend/list_view.html', context_dict, context)

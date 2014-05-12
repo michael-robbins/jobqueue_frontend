@@ -4,6 +4,7 @@ from frontend.models import Client, Category, Job, Package, File, ClientPackageA
 EDIT_ICON     = '<i class="glyphicon glyphicon-edit">'
 DELETE_ICON   = '<i class="glyphicon glyphicon-remove">'
 DISCOVER_ICON = '<i class="glyphicon glyphicon-search">'
+HISTORY_ICON  = '<i class="glyphicon glyphicon-book">'
 
 TEMPLATE_DICT = dict()
 TEMPLATE_DICT['link'] = '<a href="{{% url "{0}" {1} %}}">{2}</a>'
@@ -12,25 +13,32 @@ TABLE_CLASS = dict()
 TABLE_CLASS['class'] = "table table-striped table-hover"
 
 class ClientTable(tables.Table):
-    edit     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.client_edit'
-                    , 'client_id=record.id'
-                    , EDIT_ICON))
+    conn_string = tables.TemplateColumn('ssh -p{{record.host_port}} {{record.host_username}}@{{record.host_hostname}}')
 
-    delete   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.client_delete'
-                    , 'client_id=record.id'
-                    , DELETE_ICON))
-
-    discover = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+    discover    = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
                     'frontend.views.client_discover'
                     , 'client_id=record.id'
                     , DISCOVER_ICON))
 
+    history     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                    'frontend.views.client_history'
+                    , 'client_id=record.id'
+                    , HISTORY_ICON))
+
+    edit        = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                    'frontend.views.client_edit'
+                    , 'client_id=record.id'
+                    , EDIT_ICON))
+
+    delete      = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                    'frontend.views.client_delete'
+                    , 'client_id=record.id'
+                    , DELETE_ICON))
+
     class Meta:
         model   = Client
         attrs   = TABLE_CLASS
-        exclude = ('id', )
+        fields  = ('name', 'conn_string', 'base_path', 'max_download', 'max_upload', 'user', 'discover', 'history', 'edit', 'delete')
 
 class CategoryTable(tables.Table):
     edit     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
