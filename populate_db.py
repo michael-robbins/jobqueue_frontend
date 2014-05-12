@@ -90,6 +90,7 @@ if __name__ == '__main__':
     db_file = 'db.sqlite3'
 
     print('Deleting DB and resyncdb\'ing in 10 seconds')
+    print('Please create a superuser with the username \'test\' and password \'test\' when asked.')
     time.sleep(10)
 
     try:
