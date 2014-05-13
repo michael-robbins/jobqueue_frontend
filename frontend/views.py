@@ -46,6 +46,7 @@ def get_object(user, context_dict, context, object_name, object_id, object_class
 
     return obj
 
+
 #################
 # Generic Views #
 #################

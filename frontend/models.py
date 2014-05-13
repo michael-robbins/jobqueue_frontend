@@ -29,6 +29,7 @@ class Client(models.Model):
 
 class Category(models.Model):
     name          = models.CharField(max_length=32,  blank=False)
+    display_name  = models.CharField(max_length=32,  blank=False)
     relative_path = models.CharField(max_length=256, blank=False)
 
     def __str__(self):

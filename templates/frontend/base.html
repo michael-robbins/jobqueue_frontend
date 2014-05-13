@@ -64,7 +64,7 @@
                         <ul class="nav nav-list">
                             <li class="nav-header">Categories</li>
                             {% for category in categories %}
-                            <li><a href="{{base_url}}{{category.url}}">{{category.name}}</a></li>
+                            <li><a href="{{base_url}}{{category.url}}">{{category.display_name}}</a></li>
                             {% endfor %}
                         </ul>
                         {% else %}

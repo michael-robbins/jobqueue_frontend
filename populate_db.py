@@ -10,8 +10,8 @@ def populate():
     test_client_2 = add_Client(name='Test Client #2', host_username='test', host_hostname='testhost2'
                             , host_port=22, base_path='/data/media/', user=test_user_1)
 
-    movie_category = add_Category('Movies', 'movies/')
-    tv_category    = add_Category('TV Episodes', 'tv/')
+    movie_category = add_Category('movies', 'Movies', 'movies/')
+    tv_category    = add_Category('tv_episodes', 'TV Episodes', 'tv/')
 
     movie_package   = add_Package('Movie #1', 'Movie 1 (2009)/', movie_category, None)
     tv_base_package = add_Package('TV Show 1 - Base', 'TV Show 1/', tv_category, None)
@@ -54,32 +54,50 @@ def populate():
     sync_job = add_Job('SYNC', movie_package, test_client_2, test_client_1, test_user_1)
 
 def add_Client(name, host_username, host_hostname, host_port, base_path, user):
-    c = Client.objects.get_or_create(name=name, host_username=host_username
-                        , host_hostname=host_hostname, host_port=host_port, base_path=base_path, user=user)[0]
+    c = Client.objects.get_or_create(
+                              name=name
+                            , host_username=host_username
+                            , host_hostname=host_hostname
+                            , host_port=host_port
+                            , base_path=base_path
+                            , user=user)[0]
     return c
 
-def add_Category(name, relative_path):
-    m = Category.objects.get_or_create(name=name, relative_path=relative_path)[0]
+def add_Category(name, display_name, relative_path):
+    m = Category.objects.get_or_create(
+                              name=name
+                            , display_name=display_name
+                            , relative_path=relative_path)[0]
     return m
 
 def add_Package(name, relative_path, category, parent_package):
-    p = Package.objects.get_or_create(name=name, relative_path=relative_path
-                        , category=category, parent_package=parent_package)[0]
+    p = Package.objects.get_or_create(
+                              name=name
+                            , relative_path=relative_path
+                            , category=category
+                            , parent_package=parent_package)[0]
     return p
 
 def add_File(relative_path, file_hash, package):
-    f = File.objects.get_or_create(relative_path=relative_path, file_hash=file_hash
-                        , package=package)[0]
+    f = File.objects.get_or_create(
+                              relative_path=relative_path
+                            , file_hash=file_hash
+                            , package=package)[0]
     return f
 
 def add_ClientPackageAvailability(client, package):
-    c = ClientPackageAvailability.objects.get_or_create(client=client, package=package)[0]
+    c = ClientPackageAvailability.objects.get_or_create(
+                              client=client
+                            , package=package)[0]
     return c
 
 def add_Job(action, package, destination_client, source_client, user):
-    j = Job.objects.get_or_create(action=action, package=package
-                        , destination_client=destination_client, source_client=source_client
-                        , user=user)[0]
+    j = Job.objects.get_or_create(
+                              action=action
+                            , package=package
+                            , destination_client=destination_client
+                            , source_client=source_client
+                            , user=user)[0]
     return j
 
 def add_User(username):
