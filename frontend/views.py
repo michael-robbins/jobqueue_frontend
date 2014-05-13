@@ -122,6 +122,9 @@ def categories(request):
     context_dict['table'] = CategoryTable(categories)
     context_dict['list_name'] = 'Categories'
 
+    context_dict['add_name'] = 'Category'
+    context_dict['add_url']  = 'categories/add/'
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -183,7 +186,7 @@ def packages(request):
 
     if request.method == 'GET' and 'filter' in request.GET:
         filterby = request.GET['filter']
-        
+
         category = Category.objects.filter(name=filterby)
 
         if category:
@@ -195,6 +198,9 @@ def packages(request):
 
     context_dict['table'] = PackageTable(packages)
     context_dict['list_name'] = 'Packages'
+
+    context_dict['add_name'] = 'Package'
+    context_dict['add_url']  = 'packages/add/'
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -268,6 +274,10 @@ def clients(request):
 
     context_dict['table'] = ClientTable(clients)
     context_dict['list_name'] = 'Clients'
+
+    context_dict['add_name'] = 'Client'
+    context_dict['add_url']  = 'clients/add/'
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -355,6 +365,9 @@ def jobs(request):
     context_dict['table'] = JobTable(jobs)
     context_dict['list_name'] = 'Job Queue'
 
+    context_dict['add_name'] = 'Job'
+    context_dict['add_url']  = 'jobs/add/'
+
     return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
@@ -406,8 +419,6 @@ def job_history(request):
 
     for job in jobs:
         job.url = 'jobs/{0}'.format(job.id)
-        job.can_edit   = False
-        job.can_delete = False
 
     context_dict['list_name'] = 'Your Job History'
     context_dict['list']      = jobs

@@ -4,8 +4,9 @@
 
 {% block body_block %}
 <div class="jumbotron">
-    <h2>{{list_name}}</h2>
-    
+    <h2 style="float:left">{{list_name}}</h2>
+    <a style="float:right" href="{{base_url}}{{add_url}}"><button class="btn btn-primary">Add New {{add_name}}</button></a>
+
     {% render_table table %}
 </div>
 {% endblock %}
