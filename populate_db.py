@@ -107,9 +107,9 @@ def add_User(username):
 if __name__ == '__main__':
     db_file = 'db.sqlite3'
 
-    print('Deleting DB and resyncdb\'ing in 10 seconds')
+    print('Deleting DB and resyncdb\'ing in 5 seconds')
     print('Please create a superuser with the username \'test\' and password \'test\' when asked.')
-    time.sleep(10)
+    time.sleep(5)
 
     try:
         print('Starting: Deleting old DB')

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+import string
 
 JOB_ACTIONS = (
     ('SYNC','Sync')
@@ -33,16 +35,17 @@ class Category(models.Model):
     relative_path = models.CharField(max_length=256, blank=False)
 
     def __str__(self):
-        return self.name
+        return self.display_name
 
 class Package(models.Model):
-    name          = models.CharField(max_length=128, blank=False)
+    name          = models.CharField(max_length=128, blank=False, unique=True)
     relative_path = models.CharField(max_length=256, blank=False)
     date_created  = models.DateTimeField(auto_now_add=True)
     metadata      = models.TextField(blank=False, default='')
 
-    category       = models.ForeignKey(Category)
-    parent_package = models.ForeignKey('self', null=True)
+    category        = models.ForeignKey(Category)
+    parent_package  = models.ForeignKey('self', null=True)
+    is_base_package = models.BooleanField(blank=False, default=False)
 
     def __str__(self):
         return self.name

@@ -133,11 +133,11 @@ def category_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = CategoryFrom(request.POST)
+        form = CategoryForm(request.POST)
 
         if form.is_valid():
             form.save()
-            redirect(context_dict['base_url'] + 'categories/')
+            return redirect(context_dict['base_url'] + 'categories/')
     else:
         form = CategoryForm()
 
@@ -158,7 +158,7 @@ def category_edit(request, category_id):
 
         if form.is_valid():
             form.save()
-            redirect(context_dict['base_url'] + 'categories/')
+            return redirect(context_dict['base_url'] + 'categories/')
     else:
         form = CategoryForm(instance=category)
 
