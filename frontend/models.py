@@ -55,10 +55,19 @@ class File(models.Model):
         return self.relative_path
 
 class ClientPackageAvailability(models.Model):
-    availability = models.BooleanField(blank=False, default=True)
-    last_index   = models.DateTimeField(auto_now_add=True)
+    availability = models.BooleanField(blank=False, default=False)
+    last_index   = models.DateTimeField(auto_now_add=True, auto_now=True)
     client       = models.ForeignKey(Client)
     package      = models.ForeignKey(Package)
+
+    def __str__(self):
+        return self.availability
+
+class ClientFileAvailability(models.Model):
+    availability = models.BooleanField(blank=False, default=False)
+    last_index   = models.DateTimeField(auto_now_add=True, auto_now=True)
+    client       = models.ForeignKey(Client)
+    package_file = models.ForeignKey(File)
 
     def __str__(self):
         return self.availability

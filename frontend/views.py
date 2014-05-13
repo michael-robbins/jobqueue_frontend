@@ -8,18 +8,13 @@ from django.contrib.auth.decorators import login_required
 
 from django.db.models import Q
 
-from frontend.models import Client, Category, Job, Package, File, ClientPackageAvailability
-
+from frontend.models import Client,      Category,      Package,      Job,      File, ClientPackageAvailability, ClientFileAvailability
 from frontend.forms  import ClientForm,  CategoryForm,  PackageForm,  JobForm
 from frontend.tables import ClientTable, CategoryTable, PackageTable, JobTable
 
 ####################
 # Helper Functions #
 ####################
-edit_icon     = '<i class="glyphicon glyphicon-edit">'
-delete_icon   = '<i class="glyphicon glyphicon-remove">'
-discover_icon = '<i class="glyphicon glyphicon-search">'
-
 def has_permissions(user, action, object_name, object_instance):
     """
     Think about how I am going to implement permissions
@@ -40,60 +35,16 @@ def has_permissions(user, action, object_name, object_instance):
 
     return allowed
 
-# TODO: Figure out how to turn all below into a single function
-def get_package(user, context_dict, context, object_id, action):
-    package = get_object_or_404(Package, id=object_id)
+def get_object(user, context_dict, context, object_name, object_id, object_class, action):
+    obj = get_object_or_404(object_class, id=object_id)
 
-    allowed, message = has_permissions(user, action, 'package', package)
-
-    if not allowed:
-        context_dict['message'] = message
-        return render_to_response('frontend/access_denied.html', context_dict, context)
-
-    return package
-
-def get_category(user, context_dict, context, object_id, action):
-    category = get_object_or_404(Category, id=object_id)
-
-    allowed, message = has_permissions(user, action, 'category', category)
+    allowed, message = has_permissions(user, action, object_name, obj)
 
     if not allowed:
         context_dict['message'] = message
         return render_to_response('frontend/access_denied.html', context_dict, context)
 
-    return category
-
-def get_client(user, context_dict, context, object_id, action):
-    client = get_object_or_404(Client, id=object_id)
-
-    allowed, message = has_permissions(user, action, 'client', client)
-
-    if not allowed:
-        context_dict['message'] = message
-        return render_to_response('frontend/access_denied.html', context_dict, context)
-
-    return client
-
-def get_job(user, context_dict, context, object_id, action):
-    job = get_object_or_404(Job, id=object_id)
-
-    allowed, message = has_permissions(user, action, 'job', job)
-
-    if not allowed:
-        context_dict['message'] = message
-        return render_to_response('frontend/access_denied.html', context_dict, context)
-
-    return job
-
-def table_header(name, edit=False, delete=False, discover=False):
-    row = list()
-
-    row.append({'name': name})
-    if edit:     row.append({'name': 'Edit'})
-    if delete:   row.append({'name': 'Delete'})
-    if discover: row.append({'name': 'Discover'})
-
-    return row
+    return obj
 
 #################
 # Generic Views #
@@ -171,8 +122,7 @@ def categories(request):
     context_dict['table'] = CategoryTable(categories)
     context_dict['list_name'] = 'Categories'
 
-    return render(request, 'frontend/list_view.html', context_dict)
-    #return render(request, 'frontend/list_view.html', context_dict, context)
+    return render_to_response('frontend/list_view.html', context_dict, context)
 
 @login_required
 def category_add(request):
@@ -197,7 +147,7 @@ def category_add(request):
 def category_edit(request, category_id):
     context, context_dict = base_request(request)
 
-    category = get_category(request.user, context_dict, context, category_id, 'edit')
+    category = get_object(request.user, context_dict, context, 'category', category_id, Category, 'edit')
 
     if request.method == 'POST':
         form = CategoryForm(request.POST, instance=category)
@@ -218,7 +168,7 @@ def category_edit(request, category_id):
 def category_delete(request, category_id):
     context, context_dict = base_request(request)
 
-    category = get_category(request.user, context_dict, context, category_id, 'delete')
+    category = get_object(request.user, context_dict, context, 'category', category_id, Category, 'delete')
     category.delete()
 
     return redirect(context_dict['base_url'] + 'categories/')
@@ -271,7 +221,7 @@ def package_add(request):
 def package_view(request, package_id):
     context, context_dict = base_request(request)
 
-    package = get_package(request.user, context_dict, context, package_id, 'view')
+    package = get_object(request.user, context_dict, context, 'package', package_id, Package, 'view')
 
     context_dict['item'] = package
 
@@ -281,7 +231,7 @@ def package_view(request, package_id):
 def package_edit(request, package_id):
     context, context_dict = base_request(request)
 
-    package = get_package(request.user, context_dict, context, package_id, 'edit')
+    package = get_object(request.user, context_dict, context, 'package', package_id, Package, 'edit')
 
     if request.method == 'POST':
         form = PackageForm(request.POST, instance=package)
@@ -301,7 +251,7 @@ def package_edit(request, package_id):
 def package_delete(request, package_id):
     context, context_dict = base_request(request)
 
-    package = get_package(request.user, context_dict, context, package_id, 'delete')
+    package = get_object(request.user, context_dict, context, 'package', package_id, Package, 'delete')
     package.delete()
 
     return redirect(context_dict['base_url'] + 'packages/')
@@ -343,7 +293,7 @@ def client_add(request):
 def client_edit(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_client(request.user, context_dict, context, client_id, 'edit')
+    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'edit')
 
     if request.method == 'POST':
         form = ClientForm(request.POST, instance=client)
@@ -364,7 +314,7 @@ def client_edit(request, client_id):
 def client_delete(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_client(request.user, context_dict, context, client_id, 'delete')
+    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'delete')
     client.delete()
 
     return redirect(context_dict['base_url'] + 'clients/')
@@ -373,7 +323,7 @@ def client_delete(request, client_id):
 def client_discover(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_client(request.user, context_dict, context, client_id, 'edit')
+    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'edit')
 
     return render_to_response('frontend/client_discover.html', context_dict, context)
 
@@ -381,7 +331,7 @@ def client_discover(request, client_id):
 def client_history(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_client(request.user, context_dict, context, client_id, 'view')
+    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'view')
 
     jobs = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
                       .filter(Q(state='COMP') | Q(state='FAIL'))
@@ -429,7 +379,7 @@ def job_add(request):
 def job_view(request, job_id):
     context, context_dict = base_request(request)
 
-    job = get_job(request.user, context_dict, context, job_id, 'view')
+    job = get_object(request.user, context_dict, context, 'job', job_id, Job, 'view')
 
     context_dict['item_name'] = 'Job'
     context_dict['item'] = job
@@ -439,7 +389,7 @@ def job_view(request, job_id):
 def job_delete(request, job_id):
     context, context_dict = base_request(request)
 
-    job = get_job(request.user, context_dict, context, job_id, 'delete')
+    job = get_object(request.user, context_dict, context, 'job', job_id, Job, 'delete')
     job.delete()
 
     return redirect(context_dict['base_url'] + 'jobs/')
