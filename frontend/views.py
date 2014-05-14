@@ -100,6 +100,7 @@ def user_login(request):
 
 @login_required
 def user_logout(request):
+    context, context_dict = base_request(request)
     logout(request)
 
     return redirect(context_dict['base_url'])
