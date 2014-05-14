@@ -71,6 +71,22 @@ class PackageForm(forms.ModelForm):
 
         return relative_path
 
+    def clean(self):
+        # This is called after the individual field clean's are called
+        cleaned_data = self.cleaned_data
+
+        category        = cleaned_data['category']
+        parent_package  = cleaned_data['parent_package']
+        is_base_package = cleaned_data['is_base_package']
+
+        if is_base_package and category != 'tv_episodes':
+            raise forms.ValidationError('Only TV Episodes are allowed to be base packages')
+
+        if is_base_package and parent_package != None:
+            raise forms.ValidationError('We only allow one level of recursion with TV Episodes (Base -> Season X)')
+
+        return cleaned_data
+
 class JobForm(forms.ModelForm):
     package            = forms.ModelChoiceField(Package.objects.all())
     source_client      = forms.ModelChoiceField(Client.objects.all())
