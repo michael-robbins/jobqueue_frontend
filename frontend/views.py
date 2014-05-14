@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 
 from django.db.models import Q
 
+from django.core.urlresolvers import reverse
+
 from frontend.models import Client,      Category,      Package,      Job,      File, ClientPackageAvailability, ClientFileAvailability
 from frontend.forms  import ClientForm,  CategoryForm,  PackageForm,  JobForm
 from frontend.tables import ClientTable, CategoryTable, PackageTable, JobTable
@@ -106,7 +108,7 @@ def user_logout(request):
     return redirect(context_dict['base_url'])
 
 @login_required
-def profile(request):
+def user_profile(request):
     context, context_dict = base_request(request)
 
     return render_to_response('frontend/profile.html', context_dict, context)
@@ -288,10 +290,17 @@ def client_add(request):
 
     if request.method == 'POST':
         form = ClientForm(request.POST)
+        print('Recieved POST')
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'clients/')
+            print('Redirecting from add')
+            return redirect(reverse('clients'))
+        else:
+            print(dir(form))
+            print(form.errors)
+            print(form._errors)
+            print('Form is not valid?')
     else:
         form = ClientForm()
 
@@ -299,7 +308,7 @@ def client_add(request):
     context_dict['url_post']  = 'clients/add/'
     context_dict['form']      = form
 
-    return render_to_response('frontend/item_add_edit.html', context_dict, context)
+    return render_to_response('frontend/item_add_edit2.html', context_dict, context)
 
 @login_required
 def client_edit(request, client_id):
@@ -320,7 +329,7 @@ def client_edit(request, client_id):
     context_dict['url_post']  = 'clients/{0}/edit/'.format(client.id)
     context_dict['form']      = form
 
-    return render_to_response('frontend/item_add_edit.html', context_dict, context)
+    return render_to_response('frontend/item_add_edit2.html', context_dict, context)
 
 @login_required
 def client_delete(request, client_id):

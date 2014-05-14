@@ -42,6 +42,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'frontend',
     'django_tables2',
+    'crispy_forms',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -106,3 +107,7 @@ STATICFILES_DIRS = ( STATIC_PATH, )
 TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
 
 TEMPLATE_DIRS = ( TEMPLATE_PATH, )
+
+# Crispy settings
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+CRISPY_FAIL_SILENTLY = False

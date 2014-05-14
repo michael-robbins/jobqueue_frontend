@@ -1,0 +1,9 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block body_block %}
+<div class="jumbotron">
+    {% crispy form %}
+</div>
+{% endblock %}
