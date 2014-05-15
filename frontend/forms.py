@@ -54,6 +54,34 @@ class ClientForm(forms.ModelForm):
         return name
 
 class CategoryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        form_action = kwargs.pop('form_action')
+        form_title = kwargs.pop('form_title')
+
+        super(CategoryForm, self).__init__(*args, **kwargs)
+
+        self.helper             = FormHelper(self)
+        self.helper.form_id     = 'id-CategoryForm'
+        self.helper.form_method = 'post'
+        self.helper.form_action = form_action
+        self.helper.form_class  = 'form-horizontal'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8'
+
+        self.helper.help_text_inline  = True
+        self.helper.error_text_inline = True
+        self.helper.html5_required    = True
+
+        self.helper.layout = Layout(
+            Fieldset(
+                '<h2>{0}</h2>'.format(form_title)
+                , 'name'
+                , 'display_name'
+                , 'relative_path'
+            ),
+            FormActions(Submit('submit', 'Submit'))
+        )
+
     class Meta:
         model = Category
         widgets = {
@@ -86,6 +114,33 @@ class CategoryForm(forms.ModelForm):
 class PackageForm(forms.ModelForm):
     category       = forms.ModelChoiceField(Category.objects.all(), required=True)
     parent_package = forms.ModelChoiceField(Package.objects.filter(is_base_package=False).filter(category__name='tv_episodes'), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(PackageForm, self).__init__(*args, **kwargs)
+
+        self.helper             = FormHelper(self)
+        self.helper.form_id     = 'id-PackageForm'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'package_add'
+        self.helper.form_class  = 'form-horizontal'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8'
+
+        self.helper.help_text_inline  = True
+        self.helper.error_text_inline = True
+        self.helper.html5_required    = True
+
+        self.helper.layout = Layout(
+            Fieldset(
+                '<h2>Add New Package</h2>'
+                , 'name'
+                , 'relative_path'
+                , 'category'
+                , 'parent_package'
+                , 'is_base_package'
+            ),
+            FormActions(Submit('submit', 'Submit'))
+        )
 
     class Meta:
         model = Package
@@ -124,6 +179,32 @@ class JobForm(forms.ModelForm):
     package            = forms.ModelChoiceField(Package.objects.all())
     source_client      = forms.ModelChoiceField(Client.objects.all())
     destination_client = forms.ModelChoiceField(Client.objects.all())
+    
+    def __init__(self, *args, **kwargs):
+        super(JobForm, self).__init__(*args, **kwargs)
+
+        self.helper             = FormHelper(self)
+        self.helper.form_id     = 'id-JobForm'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'job_add'
+        self.helper.form_class  = 'form-horizontal'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8'
+
+        self.helper.help_text_inline  = True
+        self.helper.error_text_inline = True
+        self.helper.html5_required    = True
+
+        self.helper.layout = Layout(
+            Fieldset(
+                '<h2>Add New Job</h2>'
+                , 'action'
+                , 'package'
+                , 'source_client'
+                , 'destination_client'
+            ),
+            FormActions(Submit('submit', 'Submit'))
+        )
 
     class Meta:
         model = Job

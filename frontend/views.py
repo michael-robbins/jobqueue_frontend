@@ -37,8 +37,11 @@ def has_permissions(user, action, object_name, object_instance):
 
     return allowed
 
-def get_object(user, context_dict, context, object_name, object_id, object_class, action):
-    obj = get_object_or_404(object_class, id=object_id)
+def get_object(user, context_dict, context, object_name, object_class, action, attr_id=None, attr_name=None):
+    if attr_id:
+        obj = get_object_or_404(object_class, id=attr_id)
+    elif attr_name:
+        obj = get_object_or_404(object_class, name=attr_name)
 
     allowed, message = has_permissions(user, action, object_name, obj)
 
@@ -92,7 +95,7 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return redirect(context_dict['base_url'])
+                return redirect(reverse('index'))
             else:
                 context_dict['disabled_account'] = True
         else:
@@ -105,7 +108,7 @@ def user_logout(request):
     context, context_dict = base_request(request)
     logout(request)
 
-    return redirect(context_dict['base_url'])
+    return redirect(reverse('index'))
 
 @login_required
 def user_profile(request):
@@ -136,49 +139,69 @@ def category_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = CategoryForm(request.POST)
+        form = CategoryForm(
+                    request.POST
+                    , form_action = ''
+                    , form_title = 'Add New Category')
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'categories/')
+            return redirect(reverse('categories'))
     else:
-        form = CategoryForm()
+        form = CategoryForm(form_action='', form_title='Add New Category')
 
-    context_dict['item_name'] = 'Add New Category'
-    context_dict['url_post']  = 'categories/add/'
-    context_dict['form']      = form
+    context_dict['form'] = form
 
     return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
-def category_edit(request, category_id):
+def category_edit(request, category_name):
     context, context_dict = base_request(request)
 
-    category = get_object(request.user, context_dict, context, 'category', category_id, Category, 'edit')
+    category = get_object(
+                    request.user
+                    , context_dict
+                    , context
+                    , 'category'
+                    , Category
+                    , 'edit'
+                    , attr_name=category_name)
 
     if request.method == 'POST':
-        form = CategoryForm(request.POST, instance=category)
+        form = CategoryForm(
+                    request.POST
+                    , instance=category
+                    , form_action=''
+                    , form_title='Edit Category')
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'categories/')
+            return redirect(reverse('categories'))
     else:
-        form = CategoryForm(instance=category)
+        form = CategoryForm(
+                    instance=category
+                    , form_action=''
+                    , form_title='Edit Category')
 
-    context_dict['item_name'] = 'Edit Category'
-    context_dict['url_post']  = 'categories/{0}/edit/'.format(category.id)
-    context_dict['form']      = form
+    context_dict['form'] = form
 
     return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
-def category_delete(request, category_id):
+def category_delete(request, category_name):
     context, context_dict = base_request(request)
 
-    category = get_object(request.user, context_dict, context, 'category', category_id, Category, 'delete')
+    category = get_object(
+                    request.user
+                    , context_dict
+                    , context
+                    , 'category'
+                    , Category
+                    , 'delete'
+                    , attr_name=category_name)
     category.delete()
 
-    return redirect(context_dict['base_url'] + 'categories/')
+    return redirect(reverse('categories'))
 
 
 ############
@@ -217,13 +240,11 @@ def package_add(request):
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'packages/')
+            return redirect(reverse('packages'))
     else: 
         form = PackageForm()
 
-    context_dict['item_name'] = 'Add New Package'
-    context_dict['url_post']  = 'packages/add/'
-    context_dict['form']      = form
+    context_dict['form'] = form
 
     return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
@@ -231,7 +252,14 @@ def package_add(request):
 def package_view(request, package_id):
     context, context_dict = base_request(request)
 
-    package = get_object(request.user, context_dict, context, 'package', package_id, Package, 'view')
+    package = get_object(
+                request.user
+                , context_dict
+                , context
+                , 'package'
+                , Package
+                , 'view'
+                , attr_id=package_id)
 
     context_dict['item'] = package
 
@@ -241,30 +269,42 @@ def package_view(request, package_id):
 def package_edit(request, package_id):
     context, context_dict = base_request(request)
 
-    package = get_object(request.user, context_dict, context, 'package', package_id, Package, 'edit')
+    package = get_object(
+                request.user
+                , context_dict
+                , context
+                , 'package'
+                , Package
+                , 'edit'
+                , attr_id=package_id)
 
     if request.method == 'POST':
         form = PackageForm(request.POST, instance=package)
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'packages/')
+            return redirect(reverse('packages'))
     else:
         form = PackageForm(instance=package)
 
-    context_dict['item_name'] = 'Edit Package'
-    context_dict['url_post']  = 'packages/{0}/edit/'.format(package.id)
-    context_dict['form']      = form
+    context_dict['form'] = form
 
     return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 def package_delete(request, package_id):
     context, context_dict = base_request(request)
 
-    package = get_object(request.user, context_dict, context, 'package', package_id, Package, 'delete')
+    package = get_object(
+                request.user
+                , context_dict
+                , context
+                , 'package'
+                , Package
+                , 'delete'
+                , attr_id=package_id)
     package.delete()
 
-    return redirect(context_dict['base_url'] + 'packages/')
+    return redirect(reverse('packages'))
 
 
 ##################
@@ -290,61 +330,71 @@ def client_add(request):
 
     if request.method == 'POST':
         form = ClientForm(request.POST)
-        print('Recieved POST')
 
         if form.is_valid():
             form.save()
-            print('Redirecting from add')
             return redirect(reverse('clients'))
-        else:
-            print(dir(form))
-            print(form.errors)
-            print(form._errors)
-            print('Form is not valid?')
     else:
         form = ClientForm()
 
-    context_dict['item_name'] = 'Add New Client'
-    context_dict['url_post']  = 'clients/add/'
-    context_dict['form']      = form
+    context_dict['form'] = form
 
-    return render_to_response('frontend/item_add_edit2.html', context_dict, context)
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def client_edit(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'edit')
+    client = get_object(
+                request.user
+                , context_dict
+                , context
+                , 'client'
+                , Client
+                , 'edit'
+                , attr_id=client_id)
 
     if request.method == 'POST':
         form = ClientForm(request.POST, instance=client)
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'clients/')
+            return redirect(reverse('clients'))
     else:
         form = ClientForm(instance=client)
 
-    context_dict['item_name'] = 'Edit Client'
-    context_dict['url_post']  = 'clients/{0}/edit/'.format(client.id)
-    context_dict['form']      = form
+    context_dict['form'] = form
 
-    return render_to_response('frontend/item_add_edit2.html', context_dict, context)
+    return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 @login_required
 def client_delete(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'delete')
+    client = get_object(
+                request.user
+                , context_dict
+                , context
+                , 'client'
+                , Client
+                , 'delete'
+                , attr_id=client_id)
     client.delete()
 
-    return redirect(context_dict['base_url'] + 'clients/')
+    return redirect(reverse('clients'))
 
 @login_required
 def client_discover(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'edit')
+    client = get_object(
+                request.user
+                , context_dict
+                , context
+                , 'client'
+                , Client
+                , 'edit'
+                , attr_id=client_id)
 
     return render_to_response('frontend/client_discover.html', context_dict, context)
 
@@ -352,7 +402,14 @@ def client_discover(request, client_id):
 def client_history(request, client_id):
     context, context_dict = base_request(request)
 
-    client = get_object(request.user, context_dict, context, 'client', client_id, Client, 'view')
+    client = get_object(
+                request.user
+                , context_dict
+                , context
+                , 'client'
+                , Client
+                , 'view'
+                , attr_id=client_id)
 
     jobs = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
                       .filter(Q(state='COMP') | Q(state='FAIL'))
@@ -390,20 +447,25 @@ def job_add(request):
 
         if form.is_valid():
             form.save()
-            return redirect(context_dict['base_url'] + 'jobs/')
+            return redirect(reverse('jobs'))
     else:
         form = JobForm()
 
-    context_dict['item_name'] = 'Add New Job'
-    context_dict['url_post']  = 'jobs/add/'
-    context_dict['form']      = form
+    context_dict['form'] = form
 
     return render_to_response('frontend/item_add_edit.html', context_dict, context)
 
 def job_view(request, job_id):
     context, context_dict = base_request(request)
 
-    job = get_object(request.user, context_dict, context, 'job', job_id, Job, 'view')
+    job = get_object(
+            request.user
+            , context_dict
+            , context
+            , 'job'
+            , Job
+            , 'view'
+            , attr_id=job_id)
 
     context_dict['item_name'] = 'Job'
     context_dict['item'] = job
@@ -413,10 +475,17 @@ def job_view(request, job_id):
 def job_delete(request, job_id):
     context, context_dict = base_request(request)
 
-    job = get_object(request.user, context_dict, context, 'job', job_id, Job, 'delete')
+    job = get_object(
+            request.user
+            , context_dict
+            , context
+            , 'job'
+            , Job
+            , 'delete'
+            , attr_id=job_id)
     job.delete()
 
-    return redirect(context_dict['base_url'] + 'jobs/')
+    return redirect(reverse('jobs'))
 
 ###############
 # Job History #

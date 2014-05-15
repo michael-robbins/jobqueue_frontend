@@ -9,8 +9,8 @@ urlpatterns = patterns(''
 
         , url(r'^categories/$', views.categories, name='categories')
         , url(r'^categories/add/$', views.category_add, name='category_add')
-        , url(r'^categories/(?P<category_id>\d+)/edit/$', views.category_edit, name='category_edit')
-        , url(r'^categories/(?P<category_id>\d+)/delete/$', views.category_delete, name='category_delete')
+        , url(r'^categories/(?P<category_name>\w+)/edit/$', views.category_edit, name='category_edit')
+        , url(r'^categories/(?P<category_name>\w+)/delete/$', views.category_delete, name='category_delete')
 
         , url(r'^packages/$', views.packages, name='packages')
         , url(r'^packages/add/$', views.package_add, name='package_add')

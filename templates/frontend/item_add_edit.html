@@ -1,21 +1,9 @@
-o{% extends 'frontend/base.html' %}
+{% extends 'frontend/base.html' %}
 {% load static %}
-{% load addcss %}
+{% load crispy_forms_tags %}
 
 {% block body_block %}
 <div class="jumbotron">
-    <h2>{{ item_name }}</h2>
-    <form action="{{base_url}}{{url_post}}" method="post">
-        {% csrf_token %}
-        {{ form.errors }}
-        {% for field in form %}
-        <div class="form-group">
-            {{ field.label_tag }}
-            {{ field.errors }}
-            {{ field|addcss:"class,form-control" }}
-        </div>
-        {% endfor %}
-        <button class="btn btn-primary" type="submit">Save</button>
-    </form>
+    {% crispy form %}
 </div>
 {% endblock %}

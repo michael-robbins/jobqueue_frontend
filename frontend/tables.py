@@ -43,12 +43,12 @@ class ClientTable(tables.Table):
 class CategoryTable(tables.Table):
     edit     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
                     'frontend.views.category_edit'
-                    , 'category_id=record.id'
+                    , 'category_name=record.name'
                     , EDIT_ICON))
 
     delete   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
                     'frontend.views.category_delete'
-                    , 'category_id=record.id'
+                    , 'category_name=record.name'
                     , DELETE_ICON))
 
     class Meta:
