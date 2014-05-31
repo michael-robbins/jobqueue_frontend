@@ -29,6 +29,9 @@ class Client(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        permissions = (('view_client', 'Can view Client'),)
+
 class Category(models.Model):
     name          = models.CharField(max_length=32,  blank=False)
     display_name  = models.CharField(max_length=32,  blank=False)
@@ -36,6 +39,9 @@ class Category(models.Model):
 
     def __str__(self):
         return self.display_name
+
+    class Meta:
+        permissions = (('view_category', 'Can view Category'),)
 
 class Package(models.Model):
     name          = models.CharField(max_length=128, blank=False, unique=True)
@@ -50,6 +56,9 @@ class Package(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        permissions = (('view_package', 'Can view Package'),)
+
 class File(models.Model):
     relative_path = models.CharField(max_length=256, blank=False)
     file_hash     = models.CharField(max_length=128, blank=False)
@@ -57,6 +66,9 @@ class File(models.Model):
 
     def __str__(self):
         return self.relative_path
+
+    class Meta:
+        permissions = (('view_file', 'Can view File'),)
 
 class ClientPackageAvailability(models.Model):
     availability = models.BooleanField(blank=False, default=False)
@@ -67,6 +79,9 @@ class ClientPackageAvailability(models.Model):
     def __str__(self):
         return self.availability
 
+    class Meta:
+        permissions = (('view_clientpackageavailability', 'Can view Client File Availability'),)
+
 class ClientFileAvailability(models.Model):
     availability = models.BooleanField(blank=False, default=False)
     last_index   = models.DateTimeField(auto_now_add=True, auto_now=True)
@@ -75,6 +90,9 @@ class ClientFileAvailability(models.Model):
 
     def __str__(self):
         return self.availability
+
+    class Meta:
+        permissions = (('view_clientfileavailability', 'Can view Client File Availability'),)
 
 class Job(models.Model):
     state  = models.CharField(max_length=4, blank=False, choices=JOB_STATES, default=JOB_STATES[0][0])
@@ -95,4 +113,7 @@ class Job(models.Model):
                     , self.package
                     , self.source_client
                     , self.destination_client)
+
+    class Meta:
+        permissions = (('view_job', 'Can view Job'),)
 

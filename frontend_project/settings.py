@@ -20,9 +20,9 @@ try:
     with open('/etc/frontend.key') as f:
         SECRET_KEY = f.read().strip()
 except FileNotFoundError as e:
-    import string
-    import random
-    SECRET_KEY = ''.join(random.choice(string.ascii_letters + string.digits + string.punctuation) for _ in range(30))
+    import string, random
+    choices = string.ascii_letters + string.digits + string.punctuation
+    SECRET_KEY = ''.join(random.choice(choices) for _ in range(30))
     print("WARNING: SECRET_KEY unset, setting to random string: " + SECRET_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -78,7 +78,6 @@ DATABASES = {
 LANGUAGE_CODE = 'en-au'
 
 TIME_ZONE = 'Australia/Melbourne'
-DATETIME_FORMAT = ('%Y-%m-%d %H:%M:%S',)
 
 USE_I18N = True
 
@@ -97,7 +96,8 @@ LOGIN_URL = '/frontend/login/'
 
 STATIC_URL = '/static/'
 
-STATIC_PATH   = os.path.join(BASE_DIR, 'static')
+STATIC_PATH = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = '/var/www/static/'
 
 STATICFILES_DIRS = ( STATIC_PATH, )
 
@@ -111,3 +111,8 @@ TEMPLATE_DIRS = ( TEMPLATE_PATH, )
 # Crispy settings
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 CRISPY_FAIL_SILENTLY = False
+
+# Date display stuff
+DATE_FORMAT     = ('%Y-%m-%d', )
+DATETIME_FORMAT = ('%Y-%m-%d %H:%M:%S',)
+
