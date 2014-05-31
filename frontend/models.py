@@ -16,22 +16,6 @@ JOB_STATES = (
     , ('FAIL','Failed')
 )
 
-class Client(models.Model):
-    name          = models.CharField(max_length=64,  blank=False, unique=True)
-    host_username = models.CharField(max_length=64,  blank=False)
-    host_hostname = models.CharField(max_length=128, blank=False)
-    host_port     = models.IntegerField(blank=False, default=22)
-    base_path     = models.CharField(max_length=256, blank=False)
-    max_download  = models.IntegerField(blank=False, default=0)
-    max_upload    = models.IntegerField(blank=False, default=0)
-    user          = models.ForeignKey(User)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        permissions = (('view_client', 'Can view Client'),)
-
 class Category(models.Model):
     name          = models.CharField(max_length=32,  blank=False)
     display_name  = models.CharField(max_length=32,  blank=False)
@@ -70,11 +54,30 @@ class File(models.Model):
     class Meta:
         permissions = (('view_file', 'Can view File'),)
 
+class Client(models.Model):
+    name          = models.CharField(max_length=64,  blank=False, unique=True)
+    host_username = models.CharField(max_length=64,  blank=False)
+    host_hostname = models.CharField(max_length=128, blank=False)
+    host_port     = models.IntegerField(blank=False, default=22)
+    base_path     = models.CharField(max_length=256, blank=False)
+    max_download  = models.IntegerField(blank=False, default=0)
+    max_upload    = models.IntegerField(blank=False, default=0)
+    user          = models.ForeignKey(User)
+
+    packages      = models.ManyToManyField(Package, through='ClientPackageAvailability')
+    package_files = models.ManyToManyField(File,    through='ClientFileAvailability')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        permissions = (('view_client', 'Can view Client'),)
+
 class ClientPackageAvailability(models.Model):
-    availability = models.BooleanField(blank=False, default=False)
-    last_index   = models.DateTimeField(auto_now_add=True, auto_now=True)
     client       = models.ForeignKey(Client)
     package      = models.ForeignKey(Package)
+    availability = models.BooleanField(blank=False, default=False)
+    last_index   = models.DateTimeField(auto_now_add=True, auto_now=True)
 
     def __str__(self):
         return self.availability
@@ -83,10 +86,10 @@ class ClientPackageAvailability(models.Model):
         permissions = (('view_clientpackageavailability', 'Can view Client File Availability'),)
 
 class ClientFileAvailability(models.Model):
-    availability = models.BooleanField(blank=False, default=False)
-    last_index   = models.DateTimeField(auto_now_add=True, auto_now=True)
     client       = models.ForeignKey(Client)
     package_file = models.ForeignKey(File)
+    availability = models.BooleanField(blank=False, default=False)
+    last_index   = models.DateTimeField(auto_now_add=True, auto_now=True)
 
     def __str__(self):
         return self.availability

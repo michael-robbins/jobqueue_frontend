@@ -1,10 +1,12 @@
 import django_tables2 as tables
+
 from frontend.models import Client, Category, Job, Package, File, ClientPackageAvailability
 
-EDIT_ICON     = '<i class="glyphicon glyphicon-edit">'
-DELETE_ICON   = '<i class="glyphicon glyphicon-remove">'
-DISCOVER_ICON = '<i class="glyphicon glyphicon-search">'
-HISTORY_ICON  = '<i class="glyphicon glyphicon-book">'
+BASE_ICON     = '<i class="glyphicon glyphicon-{0}">'
+EDIT_ICON     = BASE_ICON.format('edit')
+DELETE_ICON   = BASE_ICON.format('remove')
+DISCOVER_ICON = BASE_ICON.format('search')
+HISTORY_ICON  = BASE_ICON.format('book')
 
 TEMPLATE_DICT = dict()
 TEMPLATE_DICT['link'] = '<a href="{{% url "{0}" {1} %}}">{2}</a>'
@@ -13,7 +15,8 @@ TABLE_CLASS = dict()
 TABLE_CLASS['class'] = "table table-striped table-hover"
 
 class ClientTable(tables.Table):
-    conn_string = tables.TemplateColumn('ssh -p{{record.host_port}} {{record.host_username}}@{{record.host_hostname}}')
+    conn_template = 'ssh -p{{record.host_port}} {{record.host_username}}@{{record.host_hostname}}'
+    conn_string   = tables.TemplateColumn(conn_template)
 
     discover    = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
                     'frontend.views.client_discover'
@@ -38,7 +41,8 @@ class ClientTable(tables.Table):
     class Meta:
         model   = Client
         attrs   = TABLE_CLASS
-        fields  = ('name', 'conn_string', 'base_path', 'max_download', 'max_upload', 'user', 'discover', 'history', 'edit', 'delete')
+        fields  = ('name', 'conn_string', 'base_path', 'max_download', 'max_upload', 'user',
+                   'discover', 'history', 'edit', 'delete')
 
 class CategoryTable(tables.Table):
     edit     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
