@@ -55,9 +55,7 @@ class ClientForm(forms.ModelForm):
             , 'base_path':     forms.TextInput(attrs=base_path)
         }
 
-    def clean_name(self):
-        name = self.cleaned_data['name'].strip()
-        return name
+    def clean_name(self): return self.cleaned_data['name'].strip()
 
 class CategoryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -107,10 +105,7 @@ class CategoryForm(forms.ModelForm):
 
         return name
 
-    def clean_display_name(self):
-        relative_name = self.cleaned_data['display_name'].strip()
-
-        return relative_name
+    def clean_display_name(self): return self.cleaned_data['display_name'].strip()
 
     def clean_relative_path(self):
         relative_path = self.cleaned_data['relative_path'].strip()
@@ -156,10 +151,7 @@ class PackageForm(forms.ModelForm):
 
         fields = ('name', 'relative_path', 'category', 'parent_package', 'is_base_package')
 
-    def clean_name(self):
-        name = self.cleaned_data['name'].strip()
-
-        return name
+    def clean_name(self): return self.cleaned_data['name'].strip()
 
     def clean_relative_path(self):
         relative_path = self.cleaned_data['relative_path'].strip()

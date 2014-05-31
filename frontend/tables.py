@@ -3,7 +3,7 @@ import django_tables2 as tables
 from frontend.models import Client, Category, Job, Package, File, ClientPackageAvailability
 
 BASE_ICON     = '<i class="glyphicon glyphicon-{0}">'
-EDIT_ICON     = BASE_ICON.format('edit')
+CHANGE_ICON   = BASE_ICON.format('edit')
 DELETE_ICON   = BASE_ICON.format('remove')
 DISCOVER_ICON = BASE_ICON.format('search')
 HISTORY_ICON  = BASE_ICON.format('book')
@@ -28,10 +28,10 @@ class ClientTable(tables.Table):
                     , 'client_id=record.id'
                     , HISTORY_ICON))
 
-    edit        = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.client_edit'
+    change      = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                    'frontend.views.client_change'
                     , 'client_id=record.id'
-                    , EDIT_ICON))
+                    , CHANGE_ICON))
 
     delete      = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
                     'frontend.views.client_delete'
@@ -42,13 +42,13 @@ class ClientTable(tables.Table):
         model   = Client
         attrs   = TABLE_CLASS
         fields  = ('name', 'conn_string', 'base_path', 'max_download', 'max_upload', 'user',
-                   'discover', 'history', 'edit', 'delete')
+                   'discover', 'history', 'change', 'delete')
 
 class CategoryTable(tables.Table):
-    edit     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.category_edit'
+    change   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                    'frontend.views.category_change'
                     , 'category_name=record.name'
-                    , EDIT_ICON))
+                    , CHANGE_ICON))
 
     delete   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
                     'frontend.views.category_delete'
@@ -61,10 +61,10 @@ class CategoryTable(tables.Table):
         exclude = ('id', )
 
 class PackageTable(tables.Table):
-    edit     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.package_edit'
+    change   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                    'frontend.views.package_change'
                     , 'package_id=record.id'
-                    , EDIT_ICON))
+                    , CHANGE_ICON))
 
     delete   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
                     'frontend.views.package_delete'
