@@ -131,8 +131,8 @@ def categories(request):
 
     categories = Category.objects.all()
 
-    if request.method == 'GET'
-        sort = request.GET.sort('sort', 'display_name')
+    if request.method == 'GET':
+        sort = request.GET.get('sort', 'display_name')
         if sort.lstrip('-') in [ field.name for field in Category._meta.fields ]:
             categories = categories.order_by(sort)
 
@@ -214,8 +214,8 @@ def packages(request):
     else:
         packages = Package.objects.all()
     
-    if request.method == 'GET'
-        sort = request.GET.sort('sort', 'name')
+    if request.method == 'GET':
+        sort = request.GET.get('sort', 'name')
         if sort.lstrip('-') in [ field.name for field in Package._meta.fields ]:
             packages = packages.order_by(sort)
 
@@ -296,8 +296,8 @@ def clients(request):
 
     clients = Client.objects.all()
 
-    if request.method == 'GET'
-        sort = request.GET.sort('sort', 'name')
+    if request.method == 'GET':
+        sort = request.GET.get('sort', 'name')
         if sort.lstrip('-') in [ field.name for field in Client._meta.fields ]:
             clients = clients.order_by(sort)
 
@@ -393,8 +393,8 @@ def jobs(request):
     jobs = Job.objects.filter(user=request.user) \
                       .filter(Q(state='PEND') | Q(state='PROG'))
 
-    if request.method == 'GET'
-        sort = request.GET.sort('sort', 'package')
+    if request.method == 'GET':
+        sort = request.GET.get('sort', 'package')
         if sort.lstrip('-') in [ field.name for field in Job._meta.fields ]:
             jobs = jobs.order_by(sort)
 
@@ -454,8 +454,8 @@ def job_history(request):
     jobs = Job.objects.filter(user=request.user) \
                       .filter(Q(state='COMP') | Q(state='FAIL'))
     
-    if request.method == 'GET'
-        sort = request.GET.sort('sort', 'package')
+    if request.method == 'GET':
+        sort = request.GET.get('sort', 'package')
         if sort.lstrip('-') in [ field.name for field in Job._meta.fields ]:
             jobs = jobs.order_by(sort)
 
