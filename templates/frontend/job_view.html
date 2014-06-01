@@ -1,8 +1,26 @@
 {% extends 'frontend/base.html' %}
 {% load static %}
+{% load django_tables2 %}
 
 {% block body_block %}
 <div class="jumbotron">
-    Job View
+    <legend>
+        <h1>Job Status</h1>
+    </legend>
+    <br />
+    {% if job %}
+    {% render_table job %}
+    {% else %}
+    <strong>Sorry, but this job doesn't appear to exist.</strong>
+    {% endif %}
+    <br />
+    <legend>
+        <h2>Sync Progress</h2>
+    </legend>
+    {% if files %}
+    {% render_table files %}
+    {% else %}
+    <strong>Sorry, but this job doesn't appear to be syncing any files.</strong>
+    {% endif %}
 </div>
 {% endblock %}

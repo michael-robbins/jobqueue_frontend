@@ -38,6 +38,7 @@ from frontend.models import ClientPackageAvailability
 
 # ClientFileAvailability
 from frontend.models import ClientFileAvailability
+from frontend.tables import ClientFileAvailabilityTable
 
 # Job
 from frontend.models import Job
@@ -136,8 +137,8 @@ def categories(request):
         if sort.lstrip('-') in [ field.name for field in Category._meta.fields ]:
             categories = categories.order_by(sort)
 
-    context_dict['table'] = CategoryTable(categories)
-    context_dict['list_name'] = 'Categories'
+    context_dict['table_name'] = 'Categories'
+    context_dict['table']      = CategoryTable(categories)
 
     context_dict['add_name'] = 'Category'
     context_dict['add_url']  = 'categories/add/'
@@ -219,8 +220,8 @@ def packages(request):
         if sort.lstrip('-') in [ field.name for field in Package._meta.fields ]:
             packages = packages.order_by(sort)
 
-    context_dict['table'] = PackageTable(packages)
-    context_dict['list_name'] = 'Packages'
+    context_dict['table_name'] = 'Packages'
+    context_dict['table']      = PackageTable(packages)
 
     context_dict['add_name'] = 'Package'
     context_dict['add_url']  = 'packages/add/'
@@ -301,8 +302,8 @@ def clients(request):
         if sort.lstrip('-') in [ field.name for field in Client._meta.fields ]:
             clients = clients.order_by(sort)
 
-    context_dict['table'] = ClientTable(clients)
-    context_dict['list_name'] = 'Clients'
+    context_dict['table_name'] = 'Clients'
+    context_dict['table']      = ClientTable(clients)
 
     context_dict['add_name'] = 'Client'
     context_dict['add_url']  = 'clients/add/'
@@ -376,8 +377,8 @@ def client_history(request, client_id):
     jobs = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
                       .filter(Q(state='COMP') | Q(state='FAIL'))
 
-    context_dict['table'] = JobTable(jobs)
-    context_dict['list_name'] = 'Client Job History'
+    context_dict['table_name'] = 'Client Job History'
+    context_dict['table']      = JobTable(jobs)
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -398,8 +399,8 @@ def jobs(request):
         if sort.lstrip('-') in [ field.name for field in Job._meta.fields ]:
             jobs = jobs.order_by(sort)
 
-    context_dict['table'] = JobTable(jobs)
-    context_dict['list_name'] = 'Job Queue'
+    context_dict['table_name'] = 'Job Queue'
+    context_dict['table']      = JobTable(jobs)
 
     context_dict['add_name'] = 'Job'
     context_dict['add_url']  = 'jobs/add/'
@@ -429,12 +430,20 @@ def job_add(request):
 def job_view(request, job_id):
     context, context_dict = base_request(request)
 
-    job = get_object_or_404(Job, id=job_id)
+    job = get_list_or_404(Job, id=job_id)
 
-    context_dict['item_name'] = 'Job'
-    context_dict['item'] = job
+    files = ClientFileAvailability.objects.filter(client=job[0].destination_client) \
+                                          .filter(package_file__package=job[0].package)
 
-    return render_to_response('frontend/item_view.html', context_dict, context)
+    if request.method == 'GET':
+        sort = request.GET.get('sort', 'package_file')
+        if sort.lstrip('-') in [ field.name for field in ClientFileAvailability._meta.fields ]:
+            files = files.order_by(sort)
+
+    context_dict['job']   = JobTable(job)
+    context_dict['files'] = ClientFileAvailabilityTable(files)
+
+    return render_to_response('frontend/job_view.html', context_dict, context)
 
 @login_required
 @permission_required('frontend.delete_job', raise_exception=True)
@@ -462,8 +471,8 @@ def job_history(request):
     for job in jobs:
         job.url = 'jobs/{0}'.format(job.id)
 
-    context_dict['list_name'] = 'Your Job History'
-    context_dict['list']      = jobs
+    context_dict['table_name'] = 'Your Job History'
+    context_dict['table']      = JobTable(jobs)
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 

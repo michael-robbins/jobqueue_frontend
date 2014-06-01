@@ -4,9 +4,29 @@
 
 {% block body_block %}
 <div class="jumbotron">
-    <h2 style="float:left">{{list_name}}</h2>
-    {% if add_name %}<a style="float:right" href="{{base_url}}{{add_url}}"><button class="btn btn-primary">Add New {{add_name}}</button></a>{% endif %}
+    {% if multi_table %}
 
+    <legend>
+        <h2>{{page_name}}</h2>
+    </legend>
+    {% for table in tables %}
+    <legend>
+        <h2>{{table.name}}</h2>
+    </legend>
     {% render_table table %}
+    {% endfor %}
+
+    {% else %}
+
+    {% if add_name %}
+    <a style="float:right" href="{{base_url}}{{add_url}}">
+        <button class="btn btn-primary">Add New {{add_name}}</button>
+    </a>
+    {% endif %}
+    <legend>
+        <h2>{{table_name}}</h2>
+    </legend>
+    {% render_table table %}
+    {% endif %}
 </div>
 {% endblock %}

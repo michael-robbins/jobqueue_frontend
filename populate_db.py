@@ -129,7 +129,10 @@ def populate():
 
 
     # Job population
+    sync_job = add_Job('SYNC', movie_package, test_client_2, test_client_1, super_user)
+    sync_job = add_Job('SYNC', movie_package, test_client_1, test_client_2, super_user)
     sync_job = add_Job('SYNC', movie_package, test_client_2, test_client_1, test_user_1)
+    sync_job = add_Job('SYNC', movie_package, test_client_2, test_client_1, test_user_2)
 
     add_job    = Permission.objects.get(codename='add_job')
     change_job = Permission.objects.get(codename='change_job')
