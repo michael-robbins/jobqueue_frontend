@@ -5,7 +5,7 @@
 {% block body_block %}
 <div class="jumbotron">
     <h2 style="float:left">{{list_name}}</h2>
-    <a style="float:right" href="{{base_url}}{{add_url}}"><button class="btn btn-primary">Add New {{add_name}}</button></a>
+    {% if add_name %}<a style="float:right" href="{{base_url}}{{add_url}}"><button class="btn btn-primary">Add New {{add_name}}</button></a>{% endif %}
 
     {% render_table table %}
 </div>
