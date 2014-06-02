@@ -5,13 +5,15 @@ from frontend.models import Client, Category, Package, Job, JOB_ACTIONS, JOB_STA
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Fieldset, Submit, Button, Div
-from crispy_forms.bootstrap import FormActions, FieldWithButtons, StrictButton
+from crispy_forms.bootstrap import FormActions
 
 import datetime
 import string
 
 class ClientForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        form_title = kwargs.pop('form_title')
+
         super(ClientForm, self).__init__(*args, **kwargs)
 
         self.helper             = FormHelper(self)
@@ -27,7 +29,7 @@ class ClientForm(forms.ModelForm):
 
         self.helper.layout = Layout(
             Fieldset(
-                '<h2>Add New Client</h2>'
+                '<h2>{0}</h2>'.format(form_title)
                 , 'name'
                 , 'host_username'
                 , 'host_hostname'
@@ -101,7 +103,8 @@ class CategoryForm(forms.ModelForm):
         name = self.cleaned_data['name'].strip()
 
         if ' ' in name or string.ascii_uppercase in name:
-            raise forms.ValidationError('Cannot contain any uppercase characters or spaces!')
+            message = 'Cannot contain any uppercase characters or spaces!'
+            raise forms.ValidationError(message)
 
         return name
 
@@ -111,21 +114,25 @@ class CategoryForm(forms.ModelForm):
         relative_path = self.cleaned_data['relative_path'].strip()
 
         if relative_path.startswith('/'):
-            raise forms.validationerror('relative path cannot start with a \'/\', needs to be relative!')
+            message = 'Relative path cannot start with a \'/\', needs to be relative!'
+            raise forms.validationerror(message)
 
         return relative_path
 
 class PackageForm(forms.ModelForm):
     category       = forms.ModelChoiceField(Category.objects.all(), required=True)
-    parent_package = forms.ModelChoiceField(Package.objects.filter(is_base_package=False).filter(category__name='tv_episodes'), required=False)
+    parent_package = forms.ModelChoiceField(Package.objects.filter(is_base_package=True)
+                                                           .filter(category__name='tv_episodes')
+                                            , required=False)
 
     def __init__(self, *args, **kwargs):
+        form_title = kwargs.pop('form_title')
+
         super(PackageForm, self).__init__(*args, **kwargs)
 
         self.helper             = FormHelper(self)
         self.helper.form_id     = 'id-PackageForm'
         self.helper.form_method = 'post'
-        self.helper.form_action = 'package_add'
         self.helper.form_class  = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
@@ -136,7 +143,7 @@ class PackageForm(forms.ModelForm):
 
         self.helper.layout = Layout(
             Fieldset(
-                '<h2>Add New Package</h2>'
+                '<h2>{0}</h2>'.format(form_title)
                 , 'name'
                 , 'relative_path'
                 , 'category'
@@ -170,13 +177,15 @@ class PackageForm(forms.ModelForm):
         parent_package  = cleaned_data['parent_package']
         is_base_package = cleaned_data['is_base_package']
 
-        if is_base_package and category != 'tv_episodes':
-            message = 'Only TV Episodes are allowed to be Base Packages'
-            raise forms.ValidationError(message)
+        tv_category = Category.objects.get(name='tv_episodes')
 
-        if is_base_package and parent_package != None:
-            message = 'We only allow one level of recursion with TV Eps (Base -> SX)'
-            raise forms.ValidationError(message)
+        if is_base_package:
+            if category != tv_category:
+                message = 'Only TV Episodes are allowed to be Base Packages'
+                raise forms.ValidationError(message)
+            elif parent_package != None:
+                message = 'We only allow one level of recursion with TV Eps (Base -> S1)'
+                raise forms.ValidationError(message)
 
         return cleaned_data
 
@@ -186,6 +195,8 @@ class JobForm(forms.ModelForm):
     destination_client = forms.ModelChoiceField(Client.objects.all())
     
     def __init__(self, *args, **kwargs):
+        form_title = kwargs.pop('form_title')
+
         super(JobForm, self).__init__(*args, **kwargs)
 
         self.helper             = FormHelper(self)
@@ -201,7 +212,7 @@ class JobForm(forms.ModelForm):
 
         self.helper.layout = Layout(
             Fieldset(
-                '<h2>Add New Job</h2>'
+                '<h2>{0}</h2>'.format(form_title)
                 , 'action'
                 , 'package'
                 , 'source_client'

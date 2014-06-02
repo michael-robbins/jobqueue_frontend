@@ -59,9 +59,26 @@ def populate():
 
 
     # Package population
-    movie_package   = add_Package('Movie #1', 'Movie 1 (2009)/', movie_category, None)
-    tv_base_package = add_Package('TV Show 1 - Base', 'TV Show 1/', tv_category, None)
-    tv_s1_package   = add_Package('TV Show 1 - S1'  , 'Season 1/', tv_category, None)
+    movie_package   = add_Package(
+                        'Movie #1'
+                        , 'Movie 1 (2009)/'
+                        , movie_category
+                        , None
+                        , False)
+
+    tv_base_package = add_Package(
+                        'TV Show 1 - Base'
+                        , 'TV Show 1/'
+                        , tv_category
+                        , None
+                        , True)
+
+    tv_s1_package   = add_Package(
+                        'TV Show 1 - S1'
+                        , 'Season 1/'
+                        , tv_category
+                        , tv_base_package
+                        , False)
 
     add_package    = Permission.objects.get(codename='add_package')
     change_package = Permission.objects.get(codename='change_package')
@@ -156,12 +173,13 @@ def add_Category(name, display_name, relative_path):
                             , relative_path=relative_path)
     return m[0]
 
-def add_Package(name, relative_path, category, parent_package):
+def add_Package(name, relative_path, category, parent_package, is_base_package):
     p = Package.objects.get_or_create(
                               name=name
                             , relative_path=relative_path
                             , category=category
-                            , parent_package=parent_package)
+                            , parent_package=parent_package
+                            , is_base_package=is_base_package)
     return p[0]
 
 def add_File(relative_path, file_hash, package):

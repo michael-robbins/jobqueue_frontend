@@ -151,7 +151,7 @@ def category_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = CategoryForm(request.POST, form_title = 'Add New Category')
+        form = CategoryForm(request.POST, form_title='Add New Category')
 
         if form.is_valid():
             form.save()
@@ -234,13 +234,13 @@ def package_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = PackageForm(request.POST)
+        form = PackageForm(request.POST, form_title='Add New Package')
 
         if form.is_valid():
             form.save()
             return redirect(reverse('packages'))
     else: 
-        form = PackageForm()
+        form = PackageForm(form_title='Add New Package')
 
     context_dict['form'] = form
 
@@ -264,13 +264,13 @@ def package_change(request, package_id):
     package = get_object_or_404(Package, id=package_id)
 
     if request.method == 'POST':
-        form = PackageForm(request.POST, instance=package)
+        form = PackageForm(request.POST, instance=package, form_title='Edit Package')
 
         if form.is_valid():
             form.save()
             return redirect(reverse('packages'))
     else:
-        form = PackageForm(instance=package)
+        form = PackageForm(instance=package, form_title='Edit Package')
 
     context_dict['form'] = form
 
@@ -316,13 +316,13 @@ def client_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = ClientForm(request.POST)
+        form = ClientForm(request.POST, form_title='Add New Client')
 
         if form.is_valid():
             form.save()
             return redirect(reverse('clients'))
     else:
-        form = ClientForm()
+        form = ClientForm(form_title='Add New Client')
 
     context_dict['form'] = form
 
@@ -336,13 +336,13 @@ def client_change(request, client_id):
     client = get_object_or_404(Client, id=client_id)
 
     if request.method == 'POST':
-        form = ClientForm(request.POST, instance=client)
+        form = ClientForm(request.POST, instance=client, form_title='Edit Client')
 
         if form.is_valid():
             form.save()
             return redirect(reverse('clients'))
     else:
-        form = ClientForm(instance=client)
+        form = ClientForm(instance=client, form_title='Edit Client')
 
     context_dict['form'] = form
 
@@ -413,13 +413,13 @@ def job_add(request):
     context, context_dict = base_request(request)
 
     if request.method == 'POST':
-        form = JobForm(request.POST)
+        form = JobForm(request.POST, form_title='Add New Job')
 
         if form.is_valid():
             form.save()
             return redirect(reverse('jobs'))
     else:
-        form = JobForm()
+        form = JobForm(form_title='Add New Job')
 
     context_dict['form'] = form
 

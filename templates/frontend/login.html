@@ -6,7 +6,7 @@
     <p></p>
 
     <div class="container">
-        <form class="form-signin col-md-4" id="login_form" method="post" action="/frontend/login/">
+        <form class="form-signin col-md-4" id="login_form" method="post" action="/frontend/login/{{next_url}}">
             <h3 class="form-signin-heading">Please sign in</h3>
             {% csrf_token %}
 
