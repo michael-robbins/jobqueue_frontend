@@ -30,12 +30,13 @@
         * Users get a detailed view of their specific Client
             * This means we need to modify the base template to be context sensitive
 
+* Have a backend that runs on (local/remote/whatever) Media Servers that can do the following:
+    * Connect to frontend
+    * Monitor queue for jobs assigned to it:
+        * Indexing
+        * Discovery
+        * Delete
+        * Sync
+
 * Write custom admin commands for:
-    * Local & Remote Discovery
-    * Indexing (new & old)
-    * Remote Indexing inititation
-
-* Integrate the backend code into Django as a custom admin command
-
-* Do we still keep a backend?
-    * Remote Indexing/Discovery
+    * Scheduling Indexing/Discovery/Syncing?
