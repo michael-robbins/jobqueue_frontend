@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'frontend',
     'django_tables2',
     'crispy_forms',
+    'rest_framework'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -116,3 +117,13 @@ CRISPY_FAIL_SILENTLY = False
 DATE_FORMAT     = ('%Y-%m-%d', )
 DATETIME_FORMAT = ('%Y-%m-%d %H:%M:%S',)
 
+# REST framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.permissions.DjangoModelPermissions',
+    )
+
+    , 'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}

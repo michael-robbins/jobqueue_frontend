@@ -1,5 +1,15 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
+from rest_framework import routers
 from frontend import views
+
+router = routers.DefaultRouter()
+router.register(r'categories', views.CategoryViewSet)
+router.register(r'packages', views.PackageViewSet)
+router.register(r'files', views.FileViewSet)
+router.register(r'clients', views.ClientViewSet)
+router.register(r'jobs', views.JobViewSet)
+router.register(r'packageavailability', views.ClientPackageAvailabilityViewSet)
+router.register(r'fileavailability', views.ClientFileAvailabilityViewSet)
 
 urlpatterns = patterns(''
         , url(r'^$', views.index
@@ -54,5 +64,7 @@ urlpatterns = patterns(''
                                         , name='job_view')
         , url(r'^jobs/(?P<job_id>\d+)/delete/$', views.job_delete
                                                , name='job_delete')
+
+        , url(r'api/', include(router.urls))
     )
 

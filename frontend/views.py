@@ -15,35 +15,46 @@ from django.db.models import Q
 # Reverse URL Discover
 from django.core.urlresolvers import reverse
 
+# Rest Framework
+from rest_framework import viewsets
+
+## Models
 # Client
 from frontend.models import Client
 from frontend.forms  import ClientForm
 from frontend.tables import ClientTable
+from frontend.serializers import ClientSerializer
 
 # Category
 from frontend.models import Category
 from frontend.forms  import CategoryForm
 from frontend.tables import CategoryTable
+from frontend.serializers import CategorySerializer
 
 # Package
 from frontend.models import Package
 from frontend.forms  import PackageForm
 from frontend.tables import PackageTable
+from frontend.serializers import PackageSerializer
 
 # File
 from frontend.models import File
+from frontend.serializers import FileSerializer
 
 # ClientPackageAvailability
 from frontend.models import ClientPackageAvailability
+from frontend.serializers import ClientPackageAvailabilitySerializer
 
 # ClientFileAvailability
 from frontend.models import ClientFileAvailability
 from frontend.tables import ClientFileAvailabilityTable
+from frontend.serializers import ClientFileAvailabilitySerializer
 
 # Job
 from frontend.models import Job
 from frontend.forms  import JobForm
 from frontend.tables import JobTable
+from frontend.serializers import JobSerializer
 
 
 ####################
@@ -475,4 +486,36 @@ def job_history(request):
     context_dict['table']      = JobTable(jobs)
 
     return render_to_response('frontend/list_view.html', context_dict, context)
+
+
+#######
+# API #
+#######
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class PackageViewSet(viewsets.ModelViewSet):
+    queryset = Package.objects.all()
+    serializer_class = PackageSerializer
+
+class FileViewSet(viewsets.ModelViewSet):
+    queryset = File.objects.all()
+    serializer_class = FileSerializer
+
+class ClientViewSet(viewsets.ModelViewSet):
+    queryset = Client.objects.all()
+    serializer_class = ClientSerializer
+
+class JobViewSet(viewsets.ModelViewSet):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
+
+class ClientPackageAvailabilityViewSet(viewsets.ModelViewSet):
+    queryset = ClientPackageAvailability.objects.all()
+    serializer_class = ClientPackageAvailabilitySerializer
+
+class ClientFileAvailabilityViewSet(viewsets.ModelViewSet):
+    queryset = ClientFileAvailability.objects.all()
+    serializer_class = ClientFileAvailabilitySerializer
 
