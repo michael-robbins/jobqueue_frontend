@@ -1,3 +1,18 @@
+* Have a backend that runs on (local/remote/whatever) Media Servers that can do the following:
+    * Connect to frontend
+    * Monitor queue for jobs assigned to it:
+        * Indexing
+        * Discovery
+        * Delete
+        * Sync
+
+* Write custom admin commands for:
+    * Scheduling Indexing/Discovery/Syncing?
+
+
+
+
+
 * Add in extra user restrictions
     * Individual Package overrides
         * Included and excluded (takes precedence over content rating restriction)
@@ -29,14 +44,3 @@
         * Super Users gets a list view of all Clients
         * Users get a detailed view of their specific Client
             * This means we need to modify the base template to be context sensitive
-
-* Have a backend that runs on (local/remote/whatever) Media Servers that can do the following:
-    * Connect to frontend
-    * Monitor queue for jobs assigned to it:
-        * Indexing
-        * Discovery
-        * Delete
-        * Sync
-
-* Write custom admin commands for:
-    * Scheduling Indexing/Discovery/Syncing?
