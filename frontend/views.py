@@ -57,11 +57,6 @@ from frontend.tables import JobTable
 from frontend.serializers import JobSerializer
 
 
-####################
-# Helper Functions #
-####################
-
-
 #################
 # Generic Views #
 #################

@@ -6,18 +6,27 @@ import datetime
 
 def populate():
     super_user = User.objects.get(username='test')
+    super_user_token = Token.objects.create(user=super_user)
+    print("Super User Token: {0}".format(super_user_token.key))
 
     test_user_1 = add_User(username='test1', email='test1@test.com', password='test1')
     test_user_1.set_password('test1')
     test_user_1.save()
+    test_user_1_token = Token.objects.create(user=test_user_1)
+    print("User1 Token: {0}".format(test_user_1_token.key))
+    
 
     test_user_2 = add_User(username='test2', email='test2@test.com', password='test2')
     test_user_2.set_password('test2')
     test_user_2.save()
+    test_user_2_token = Token.objects.create(user=test_user_2)
+    print("User2 Token: {0}".format(test_user_2_token.key))
 
     test_user_3 = add_User(username='test3', email='test3@test.com', password='test3')
     test_user_3.set_password('test3')
     test_user_3.save()
+    test_user_3_token = Token.objects.create(user=test_user_3)
+    print("User3 Token: {0}".format(test_user_3_token.key))
 
     test_group_1 = add_Group(name='Test Group 1')
     test_group_2 = add_Group(name='Test Group 2')
@@ -156,6 +165,15 @@ def populate():
     delete_job = Permission.objects.get(codename='delete_job')
     view_job   = Permission.objects.get(codename='view_job')
 
+    # Permission Assignment
+    test_group_1.permissions.add(add_client, change_client, delete_client, view_client,
+        add_category, change_category, delete_category, view_category)
+    test_group_2.permissions.add(add_package, change_package, delete_package, view_package,
+        add_file, change_file, delete_file, view_file)
+    test_group_3.permissions.add(add_clientpackage, change_clientpackage, delete_clientpackage, view_clientpackage,
+        add_clientfile, change_clientfile, delete_clientfile, view_clientfile)
+    test_group_4.permissions
+
 def add_Client(name, host_username, host_hostname, host_port, base_path, user):
     c = Client.objects.get_or_create(
                               name=name
@@ -233,6 +251,7 @@ if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'frontend_project.settings')
     from frontend.models import *
     from django.contrib.auth.models import User, Group, Permission
+    from rest_framework.authtoken.models import Token
     from django.contrib.auth.management.commands import changepassword
     from django.core import management
 

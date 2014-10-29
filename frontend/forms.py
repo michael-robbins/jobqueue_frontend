@@ -16,16 +16,16 @@ class ClientForm(forms.ModelForm):
 
         super(ClientForm, self).__init__(*args, **kwargs)
 
-        self.helper             = FormHelper(self)
-        self.helper.form_id     = 'id-ClientForm'
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-ClientForm'
         self.helper.form_method = 'post'
-        self.helper.form_class  = 'form-horizontal'
+        self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
 
-        self.helper.help_text_inline  = True
+        self.helper.help_text_inline = True
         self.helper.error_text_inline = True
-        self.helper.html5_required    = True
+        self.helper.html5_required = True
 
         self.helper.layout = Layout(
             Fieldset(
@@ -45,16 +45,16 @@ class ClientForm(forms.ModelForm):
     class Meta:
         model = Client
 
-        name          = {'placeholder': 'Name of the Client'}
+        name = {'placeholder': 'Name of the Client'}
         host_username = {'placeholder': 'User we are connecting as'}
         host_hostname = {'placeholder': 'FQDN of the host'}
-        base_path     = {'placeholder': '/path/to/base/dir/for/media'}
+        base_path = {'placeholder': '/path/to/base/dir/for/media'}
 
         widgets = {
-              'name':          forms.TextInput(attrs=name)
+              'name': forms.TextInput(attrs=name)
             , 'host_username': forms.TextInput(attrs=host_username)
             , 'host_hostname': forms.TextInput(attrs=host_hostname)
-            , 'base_path':     forms.TextInput(attrs=base_path)
+            , 'base_path': forms.TextInput(attrs=base_path)
         }
 
     def clean_name(self): return self.cleaned_data['name'].strip()
@@ -65,16 +65,16 @@ class CategoryForm(forms.ModelForm):
 
         super(CategoryForm, self).__init__(*args, **kwargs)
 
-        self.helper             = FormHelper(self)
-        self.helper.form_id     = 'id-CategoryForm'
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-CategoryForm'
         self.helper.form_method = 'post'
-        self.helper.form_class  = 'form-horizontal'
+        self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
 
-        self.helper.help_text_inline  = True
+        self.helper.help_text_inline = True
         self.helper.error_text_inline = True
-        self.helper.html5_required    = True
+        self.helper.html5_required = True
 
         self.helper.layout = Layout(
             Fieldset(
@@ -89,13 +89,13 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
 
-        name          = {'placeholder': 'Behind-the-scenes name of the Category'}
-        display_name  = {'placeholder': 'Name everyone will see'}
+        name = {'placeholder': 'Behind-the-scenes name of the Category'}
+        display_name = {'placeholder': 'Name everyone will see'}
         relative_path = {'placeholder': 'path/to/category'}
 
         widgets = {
-              'name':          forms.TextInput(attrs=name)
-            , 'display_name':  forms.TextInput(attrs=display_name)
+              'name': forms.TextInput(attrs=name)
+            , 'display_name': forms.TextInput(attrs=display_name)
             , 'relative_path': forms.TextInput(attrs=relative_path)
         }
 
@@ -120,9 +120,9 @@ class CategoryForm(forms.ModelForm):
         return relative_path
 
 class PackageForm(forms.ModelForm):
-    category       = forms.ModelChoiceField(Category.objects.all(), required=True)
+    category = forms.ModelChoiceField(Category.objects.all(), required=True)
     parent_package = forms.ModelChoiceField(Package.objects.filter(is_base_package=True)
-                                                           .filter(category__name='tv_episodes')
+                                            .filter(category__name='tv_episodes')
                                             , required=False)
 
     def __init__(self, *args, **kwargs):
@@ -130,16 +130,16 @@ class PackageForm(forms.ModelForm):
 
         super(PackageForm, self).__init__(*args, **kwargs)
 
-        self.helper             = FormHelper(self)
-        self.helper.form_id     = 'id-PackageForm'
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-PackageForm'
         self.helper.form_method = 'post'
-        self.helper.form_class  = 'form-horizontal'
+        self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
 
-        self.helper.help_text_inline  = True
+        self.helper.help_text_inline = True
         self.helper.error_text_inline = True
-        self.helper.html5_required    = True
+        self.helper.html5_required = True
 
         self.helper.layout = Layout(
             Fieldset(
@@ -173,8 +173,8 @@ class PackageForm(forms.ModelForm):
         # This is called after the individual field clean's are called
         cleaned_data = self.cleaned_data
 
-        category        = cleaned_data['category']
-        parent_package  = cleaned_data['parent_package']
+        category = cleaned_data['category']
+        parent_package = cleaned_data['parent_package']
         is_base_package = cleaned_data['is_base_package']
 
         tv_category = Category.objects.get(name='tv_episodes')
@@ -190,8 +190,8 @@ class PackageForm(forms.ModelForm):
         return cleaned_data
 
 class JobForm(forms.ModelForm):
-    package            = forms.ModelChoiceField(Package.objects.all())
-    source_client      = forms.ModelChoiceField(Client.objects.all())
+    package = forms.ModelChoiceField(Package.objects.all())
+    source_client = forms.ModelChoiceField(Client.objects.all())
     destination_client = forms.ModelChoiceField(Client.objects.all())
     
     def __init__(self, *args, **kwargs):
@@ -199,16 +199,16 @@ class JobForm(forms.ModelForm):
 
         super(JobForm, self).__init__(*args, **kwargs)
 
-        self.helper             = FormHelper(self)
-        self.helper.form_id     = 'id-JobForm'
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-JobForm'
         self.helper.form_method = 'post'
-        self.helper.form_class  = 'form-horizontal'
+        self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-lg-2'
         self.helper.field_class = 'col-lg-8'
 
-        self.helper.help_text_inline  = True
+        self.helper.help_text_inline = True
         self.helper.error_text_inline = True
-        self.helper.html5_required    = True
+        self.helper.html5_required  = True
 
         self.helper.layout = Layout(
             Fieldset(

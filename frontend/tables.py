@@ -16,81 +16,81 @@ TABLE_CLASS['class'] = "table table-striped table-hover"
 
 class ClientTable(tables.Table):
     conn_template = 'ssh -p{{record.host_port}} {{record.host_username}}@{{record.host_hostname}}'
-    conn_string   = tables.TemplateColumn(conn_template, orderable=False)
+    conn_string = tables.TemplateColumn(conn_template, orderable=False)
 
-    discover    = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.client_discover'
-                    , 'client_id=record.id'
-                    , DISCOVER_ICON), orderable=False)
+    discover = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.client_discover'
+                , 'client_id=record.id'
+                , DISCOVER_ICON), orderable=False)
 
-    history     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.client_history'
-                    , 'client_id=record.id'
-                    , HISTORY_ICON), orderable=False)
+    history = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.client_history'
+                , 'client_id=record.id'
+                , HISTORY_ICON), orderable=False)
 
-    change      = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.client_change'
-                    , 'client_id=record.id'
-                    , CHANGE_ICON), orderable=False)
+    change = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.client_change'
+                , 'client_id=record.id'
+                , CHANGE_ICON), orderable=False)
 
-    delete      = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.client_delete'
-                    , 'client_id=record.id'
-                    , DELETE_ICON), orderable=False)
+    delete = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.client_delete'
+                , 'client_id=record.id'
+                , DELETE_ICON), orderable=False)
 
     class Meta:
-        model   = Client
-        attrs   = TABLE_CLASS
-        fields  = ('name', 'conn_string', 'base_path', 'max_download', 'max_upload', 'user',
-                   'discover', 'history', 'change', 'delete')
+        model = Client
+        attrs = TABLE_CLASS
+        fields = ('name', 'conn_string', 'base_path', 'max_download', 'max_upload', 'user',
+                  'discover', 'history', 'change', 'delete')
 
 class CategoryTable(tables.Table):
-    change   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.category_change'
-                    , 'category_name=record.name'
-                    , CHANGE_ICON), orderable=False)
+    change = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.category_change'
+                , 'category_name=record.name'
+                , CHANGE_ICON), orderable=False)
 
-    delete   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.category_delete'
-                    , 'category_name=record.name'
-                    , DELETE_ICON), orderable=False)
+    delete = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.category_delete'
+                , 'category_name=record.name'
+                , DELETE_ICON), orderable=False)
 
     class Meta:
-        model   = Category
-        attrs   = TABLE_CLASS
+        model = Category
+        attrs = TABLE_CLASS
         exclude = ('id', 'name')
 
 class PackageTable(tables.Table):
-    change   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.package_change'
-                    , 'package_id=record.id'
-                    , CHANGE_ICON), orderable=False)
+    change = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.package_change'
+                , 'package_id=record.id'
+                , CHANGE_ICON), orderable=False)
 
-    delete   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.package_delete'
-                    , 'package_id=record.id'
-                    , DELETE_ICON), orderable=False)
+    delete = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.package_delete'
+                , 'package_id=record.id'
+                , DELETE_ICON), orderable=False)
 
     class Meta:
-        model   = Package
-        attrs   = TABLE_CLASS
-        fields  = ('name', 'relative_path', 'category', 'parent_package',
-                   'is_base_package', 'date_created')
+        model = Package
+        attrs = TABLE_CLASS
+        fields = ('name', 'relative_path', 'category', 'parent_package',
+                  'is_base_package', 'date_created')
 
 class JobTable(tables.Table):
-    view     = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.job_view'
-                    , 'job_id=record.id'
-                    , DISCOVER_ICON), orderable=False)
+    view = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.job_view'
+                , 'job_id=record.id'
+                , DISCOVER_ICON), orderable=False)
 
-    delete   = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
-                    'frontend.views.job_delete'
-                    , 'job_id=record.id'
-                    , DELETE_ICON), orderable=False)
+    delete = tables.TemplateColumn(TEMPLATE_DICT['link'].format(
+                'frontend.views.job_delete'
+                , 'job_id=record.id'
+                , DELETE_ICON), orderable=False)
 
     class Meta:
-        model   = Job
-        attrs   = TABLE_CLASS
+        model = Job
+        attrs = TABLE_CLASS
         exclude = ('id', )
 
 class ClientFileAvailabilityTable(tables.Table):
