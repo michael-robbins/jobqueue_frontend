@@ -172,7 +172,6 @@ def populate():
         add_file, change_file, delete_file, view_file)
     test_group_3.permissions.add(add_clientpackage, change_clientpackage, delete_clientpackage, view_clientpackage,
         add_clientfile, change_clientfile, delete_clientfile, view_clientfile)
-    test_group_4.permissions
 
 def add_Client(name, host_username, host_hostname, host_port, base_path, user):
     c = Client.objects.get_or_create(

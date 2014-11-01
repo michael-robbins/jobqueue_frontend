@@ -20,7 +20,8 @@ try:
     with open('/etc/frontend.key') as f:
         SECRET_KEY = f.read().strip()
 except FileNotFoundError as e:
-    import string, random
+    import random
+    import string
     choices = string.ascii_letters + string.digits + string.punctuation
     SECRET_KEY = ''.join(random.choice(choices) for _ in range(30))
     print("WARNING: SECRET_KEY unset, setting to random string: " + SECRET_KEY)
@@ -101,7 +102,7 @@ STATIC_URL = '/static/'
 STATIC_PATH = os.path.join(BASE_DIR, 'static')
 STATIC_ROOT = '/var/www/static/'
 
-STATICFILES_DIRS = ( STATIC_PATH, )
+STATICFILES_DIRS = (STATIC_PATH, )
 
 
 # Template files (*.html)
@@ -115,7 +116,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 CRISPY_FAIL_SILENTLY = False
 
 # Date display stuff
-DATE_FORMAT     = ('%Y-%m-%d', )
+DATE_FORMAT = ('%Y-%m-%d', )
 DATETIME_FORMAT = ('%Y-%m-%d %H:%M:%S',)
 
 # REST framework

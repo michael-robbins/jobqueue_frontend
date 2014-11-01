@@ -1,12 +1,10 @@
-# Bare minimum Django obejcts required
-from django.http      import Http404
-from django.template  import RequestContext
-from django.shortcuts import render, render_to_response, redirect
+# Bare minimum Django objects required
+from django.template import RequestContext
+from django.shortcuts import render_to_response, redirect
 from django.shortcuts import get_object_or_404, get_list_or_404
 
 # Django auth model and functions
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth.decorators import login_required, permission_required
 
 # Allows SQL-esque OR & AND statements in model filters
@@ -21,19 +19,19 @@ from rest_framework import viewsets
 ## Models
 # Client
 from frontend.models import Client
-from frontend.forms  import ClientForm
+from frontend.forms import ClientForm
 from frontend.tables import ClientTable
 from frontend.serializers import ClientSerializer
 
 # Category
 from frontend.models import Category
-from frontend.forms  import CategoryForm
+from frontend.forms import CategoryForm
 from frontend.tables import CategoryTable
 from frontend.serializers import CategorySerializer
 
 # Package
 from frontend.models import Package
-from frontend.forms  import PackageForm
+from frontend.forms import PackageForm
 from frontend.tables import PackageTable
 from frontend.serializers import PackageSerializer
 
@@ -52,7 +50,7 @@ from frontend.serializers import ClientFileAvailabilitySerializer
 
 # Job
 from frontend.models import Job
-from frontend.forms  import JobForm
+from frontend.forms import JobForm
 from frontend.tables import JobTable
 from frontend.serializers import JobSerializer
 
@@ -67,26 +65,28 @@ def base_request(request):
     context_dict['base_url'] = '/frontend/'
 
     # TODO: Cache this shit...
-    categories = Category.objects.all()
+    temp_categories = Category.objects.all()
 
-    for category in categories:
+    for category in temp_categories:
         category.url = 'packages/?category={0}'.format(category.name)
 
-    context_dict['categories'] = categories
+    context_dict['categories'] = temp_categories
 
     return context, context_dict
+
 
 @login_required
 def index(request):
     context, context_dict = base_request(request)
 
-    context_dict['user_job_queue']   = Job.objects.filter(user=request.user) \
-                                                  .filter(Q(state='PEND') | Q(state='PROG'))
+    context_dict['user_job_queue'] = Job.objects.filter(user=request.user) \
+                                                .filter(Q(state='PEND') | Q(state='PROG'))
 
     context_dict['user_job_history'] = Job.objects.filter(user=request.user) \
                                                   .filter(Q(state='COMP') | Q(state='FAIL'))[:5]
 
     return render_to_response('frontend/index.html', context_dict, context)
+
 
 def user_login(request):
     context, context_dict = base_request(request)
@@ -106,7 +106,7 @@ def user_login(request):
         else:
             context_dict['bad_details'] = True
 
-    # Keep the next hop incase they fail to login
+    # Keep the next hop in-case they fail to login
     next_hop = request.GET.get('next', None)
 
     if next_hop:
@@ -114,12 +114,13 @@ def user_login(request):
 
     return render_to_response('frontend/login.html', context_dict, context)
 
+
 @login_required
 def user_logout(request):
-    context, context_dict = base_request(request)
     logout(request)
 
     return redirect(reverse('index'))
+
 
 @login_required
 def user_profile(request):
@@ -136,20 +137,21 @@ def user_profile(request):
 def categories(request):
     context, context_dict = base_request(request)
 
-    categories = Category.objects.all()
+    temp_categories = Category.objects.all()
 
     if request.method == 'GET':
         sort = request.GET.get('sort', 'display_name')
-        if sort.lstrip('-') in [ field.name for field in Category._meta.fields ]:
-            categories = categories.order_by(sort)
+        if sort.lstrip('-') in [field.name for field in Category._meta.fields]:
+            temp_categories = temp_categories.order_by(sort)
 
     context_dict['table_name'] = 'Categories'
-    context_dict['table']      = CategoryTable(categories)
+    context_dict['table'] = CategoryTable(temp_categories)
 
     context_dict['add_name'] = 'Category'
-    context_dict['add_url']  = 'categories/add/'
+    context_dict['add_url'] = 'categories/add/'
 
     return render_to_response('frontend/list_view.html', context_dict, context)
+
 
 @login_required
 @permission_required('frontend.add_category', raise_exception=True)
@@ -169,6 +171,7 @@ def category_add(request):
 
     return render_to_response('frontend/item_add_change.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.change_category', raise_exception=True)
 def category_change(request, category_name):
@@ -183,17 +186,17 @@ def category_change(request, category_name):
             form.save()
             return redirect(reverse('categories'))
     else:
-        form = CategoryForm(
-                    instance=category, form_title='Edit Category')
+        form = CategoryForm(instance=category, form_title='Edit Category')
 
     context_dict['form'] = form
 
     return render_to_response('frontend/item_add_change.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.delete_category', raise_exception=True)
 def category_delete(request, category_name):
-    context, context_dict = base_request(request)
+    _, _ = base_request(request)
 
     category = get_object_or_404(Category, name=category_name)
     category.delete()
@@ -215,24 +218,25 @@ def packages(request):
         category = Category.objects.filter(name=filterby)
 
         if category:
-            packages = Package.objects.filter(category=category)
+            temp_packages = Package.objects.filter(category=category)
         else:
-            packages = Package.objects.all()
+            temp_packages = Package.objects.all()
     else:
-        packages = Package.objects.all()
+        temp_packages = Package.objects.all()
     
     if request.method == 'GET':
         sort = request.GET.get('sort', 'name')
-        if sort.lstrip('-') in [ field.name for field in Package._meta.fields ]:
-            packages = packages.order_by(sort)
+        if sort.lstrip('-') in [field.name for field in Package._meta.fields]:
+            temp_packages = temp_packages.order_by(sort)
 
     context_dict['table_name'] = 'Packages'
-    context_dict['table']      = PackageTable(packages)
+    context_dict['table'] = PackageTable(temp_packages)
 
     context_dict['add_name'] = 'Package'
-    context_dict['add_url']  = 'packages/add/'
+    context_dict['add_url'] = 'packages/add/'
 
     return render_to_response('frontend/list_view.html', context_dict, context)
+
 
 @login_required
 @permission_required('frontend.add_package', raise_exception=True)
@@ -252,6 +256,7 @@ def package_add(request):
 
     return render_to_response('frontend/item_add_change.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.view_package', raise_exception=True)
 def package_view(request, package_id):
@@ -261,6 +266,7 @@ def package_view(request, package_id):
     context_dict['item'] = package
 
     return render_to_response('frontend/item_view.html', context_dict, context)
+
 
 @login_required
 @permission_required('frontend.change_package', raise_exception=True)
@@ -282,10 +288,11 @@ def package_change(request, package_id):
 
     return render_to_response('frontend/item_add_change.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.delete_package', raise_exception=True)
 def package_delete(request, package_id):
-    context, context_dict = base_request(request)
+    _, _ = base_request(request)
 
     package = get_object_or_404(Package, id=package_id)
     package.delete()
@@ -301,20 +308,21 @@ def package_delete(request, package_id):
 def clients(request):
     context, context_dict = base_request(request)
 
-    clients = Client.objects.all()
+    temp_clients = Client.objects.all()
 
     if request.method == 'GET':
         sort = request.GET.get('sort', 'name')
-        if sort.lstrip('-') in [ field.name for field in Client._meta.fields ]:
-            clients = clients.order_by(sort)
+        if sort.lstrip('-') in [field.name for field in Client._meta.fields]:
+            temp_clients = temp_clients.order_by(sort)
 
     context_dict['table_name'] = 'Clients'
-    context_dict['table']      = ClientTable(clients)
+    context_dict['table'] = ClientTable(temp_clients)
 
     context_dict['add_name'] = 'Client'
-    context_dict['add_url']  = 'clients/add/'
+    context_dict['add_url'] = 'clients/add/'
 
     return render_to_response('frontend/list_view.html', context_dict, context)
+
 
 @login_required
 @permission_required('frontend.add_client', raise_exception=True)
@@ -334,6 +342,7 @@ def client_add(request):
 
     return render_to_response('frontend/item_add_change.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.change_client', raise_exception=True)
 def client_change(request, client_id):
@@ -342,9 +351,16 @@ def client_change(request, client_id):
     client = get_object_or_404(Client, id=client_id)
 
     if request.method == 'POST':
+        print('POST detected')
         form = ClientForm(request.POST, instance=client, form_title='Edit Client')
 
+        print(dir(form))
+        print(form.non_field_errors)
+        print(form.errors)
+        print(form)
+
         if form.is_valid():
+            print('Client change detected')
             form.save()
             return redirect(reverse('clients'))
     else:
@@ -354,15 +370,17 @@ def client_change(request, client_id):
 
     return render_to_response('frontend/item_add_change.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.delete_client', raise_exception=True)
 def client_delete(request, client_id):
-    context, context_dict = base_request(request)
+    _, _ = base_request(request)
 
     client = get_object_or_404(Client, id=client_id)
     client.delete()
 
     return redirect(reverse('clients'))
+
 
 @login_required
 @permission_required('frontend.discover_client', raise_exception=True)
@@ -373,6 +391,7 @@ def client_discover(request, client_id):
 
     return render_to_response('frontend/client_discover.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.view_client', raise_exception=True)
 def client_history(request, client_id):
@@ -380,11 +399,11 @@ def client_history(request, client_id):
 
     client = get_object_or_404(Client, id=client_id)
 
-    jobs = Job.objects.filter(Q(destination_client=client) | Q(source_client=client)) \
-                      .filter(Q(state='COMP') | Q(state='FAIL'))
+    temp_jobs = Job.objects.filter(Q(destination_client=client) |
+                                   Q(source_client=client)).filter(Q(state='COMP') | Q(state='FAIL'))
 
     context_dict['table_name'] = 'Client Job History'
-    context_dict['table']      = JobTable(jobs)
+    context_dict['table'] = JobTable(temp_jobs)
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -397,21 +416,22 @@ def client_history(request, client_id):
 def jobs(request):
     context, context_dict = base_request(request)
 
-    jobs = Job.objects.filter(user=request.user) \
-                      .filter(Q(state='PEND') | Q(state='PROG'))
+    temp_jobs = Job.objects.filter(user=request.user) \
+                           .filter(Q(state='PEND') | Q(state='PROG'))
 
     if request.method == 'GET':
         sort = request.GET.get('sort', 'package')
-        if sort.lstrip('-') in [ field.name for field in Job._meta.fields ]:
-            jobs = jobs.order_by(sort)
+        if sort.lstrip('-') in [field.name for field in Job._meta.fields]:
+            temp_jobs = temp_jobs.order_by(sort)
 
     context_dict['table_name'] = 'Job Queue'
-    context_dict['table']      = JobTable(jobs)
+    context_dict['table'] = JobTable(temp_jobs)
 
     context_dict['add_name'] = 'Job'
-    context_dict['add_url']  = 'jobs/add/'
+    context_dict['add_url'] = 'jobs/add/'
 
     return render_to_response('frontend/list_view.html', context_dict, context)
+
 
 @login_required
 @permission_required('frontend.add_job', raise_exception=True)
@@ -431,6 +451,7 @@ def job_add(request):
 
     return render_to_response('frontend/item_add_change.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.view_job', raise_exception=True)
 def job_view(request, job_id):
@@ -443,42 +464,44 @@ def job_view(request, job_id):
 
     if request.method == 'GET':
         sort = request.GET.get('sort', 'package_file')
-        if sort.lstrip('-') in [ field.name for field in ClientFileAvailability._meta.fields ]:
+        if sort.lstrip('-') in [field.name for field in ClientFileAvailability._meta.fields]:
             files = files.order_by(sort)
 
-    context_dict['job']   = JobTable(job)
+    context_dict['job'] = JobTable(job)
     context_dict['files'] = ClientFileAvailabilityTable(files)
 
     return render_to_response('frontend/job_view.html', context_dict, context)
 
+
 @login_required
 @permission_required('frontend.delete_job', raise_exception=True)
 def job_delete(request, job_id):
-    context, context_dict = base_request(request)
+    _, _ = base_request(request)
 
     job = get_object_or_404(Job, id=job_id)
     job.delete()
 
     return redirect(reverse('jobs'))
 
+
 @login_required
 @permission_required('frontend.view_job', raise_exception=True)
 def job_history(request):
     context, context_dict = base_request(request)
 
-    jobs = Job.objects.filter(user=request.user) \
+    temp_jobs = Job.objects.filter(user=request.user) \
                       .filter(Q(state='COMP') | Q(state='FAIL'))
     
     if request.method == 'GET':
         sort = request.GET.get('sort', 'package')
-        if sort.lstrip('-') in [ field.name for field in Job._meta.fields ]:
-            jobs = jobs.order_by(sort)
+        if sort.lstrip('-') in [field.name for field in Job._meta.fields]:
+            temp_jobs = temp_jobs.order_by(sort)
 
-    for job in jobs:
+    for job in temp_jobs:
         job.url = 'jobs/{0}'.format(job.id)
 
     context_dict['table_name'] = 'Your Job History'
-    context_dict['table']      = JobTable(jobs)
+    context_dict['table'] = JobTable(temp_jobs)
 
     return render_to_response('frontend/list_view.html', context_dict, context)
 
@@ -490,27 +513,32 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+
 class PackageViewSet(viewsets.ModelViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
+
 
 class FileViewSet(viewsets.ModelViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
 
+
 class ClientViewSet(viewsets.ModelViewSet):
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
+
 
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
 
+
 class ClientPackageAvailabilityViewSet(viewsets.ModelViewSet):
     queryset = ClientPackageAvailability.objects.all()
     serializer_class = ClientPackageAvailabilitySerializer
 
+
 class ClientFileAvailabilityViewSet(viewsets.ModelViewSet):
     queryset = ClientFileAvailability.objects.all()
     serializer_class = ClientFileAvailabilitySerializer
-
