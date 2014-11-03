@@ -23,7 +23,7 @@ class FileSerializer(serializers.ModelSerializer):
 class ClientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        depth = 1
+        exclude = ('packages', 'package_files')
 
 
 class JobSerializer(serializers.ModelSerializer):

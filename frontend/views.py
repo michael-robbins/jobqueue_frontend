@@ -522,6 +522,7 @@ class PackageViewSet(viewsets.ModelViewSet):
 class FileViewSet(viewsets.ModelViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
+    filter_fields = ('package',)
 
 
 class ClientViewSet(viewsets.ModelViewSet):
@@ -537,8 +538,10 @@ class JobViewSet(viewsets.ModelViewSet):
 class ClientPackageAvailabilityViewSet(viewsets.ModelViewSet):
     queryset = ClientPackageAvailability.objects.all()
     serializer_class = ClientPackageAvailabilitySerializer
+    filter_fields = ('client', 'package')
 
 
 class ClientFileAvailabilityViewSet(viewsets.ModelViewSet):
     queryset = ClientFileAvailability.objects.all()
     serializer_class = ClientFileAvailabilitySerializer
+    filter_fields = ('client', 'package_file')
