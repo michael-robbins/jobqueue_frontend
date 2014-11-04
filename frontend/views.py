@@ -351,16 +351,9 @@ def client_change(request, client_id):
     client = get_object_or_404(Client, id=client_id)
 
     if request.method == 'POST':
-        print('POST detected')
         form = ClientForm(request.POST, instance=client, form_title='Edit Client')
 
-        print(dir(form))
-        print(form.non_field_errors)
-        print(form.errors)
-        print(form)
-
         if form.is_valid():
-            print('Client change detected')
             form.save()
             return redirect(reverse('clients'))
     else:

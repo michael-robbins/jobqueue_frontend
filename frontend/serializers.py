@@ -21,6 +21,8 @@ class FileSerializer(serializers.ModelSerializer):
 
 
 class ClientSerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field='username')
+
     class Meta:
         model = Client
         exclude = ('packages', 'package_files')
