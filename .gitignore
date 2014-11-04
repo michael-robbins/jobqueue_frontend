@@ -43,3 +43,6 @@ coverage.xml
 
 # SQLite3 DB
 *.sqlite3
+
+# PyCharm workspace
+.idea
