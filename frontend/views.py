@@ -533,6 +533,7 @@ class ClientViewSet(viewsets.ModelViewSet):
 class JobViewSet(viewsets.ModelViewSet):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
+    filter_fields = ('state',)
 
 
 class ClientPackageAvailabilityViewSet(viewsets.ModelViewSet):

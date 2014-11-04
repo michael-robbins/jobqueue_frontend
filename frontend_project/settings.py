@@ -33,7 +33,6 @@ ALLOWED_HOSTS = ['*']
 
 
 # Application definition
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -102,34 +101,33 @@ STATIC_URL = '/static/'
 STATIC_PATH = os.path.join(BASE_DIR, 'static')
 STATIC_ROOT = '/var/www/static/'
 
-STATICFILES_DIRS = (STATIC_PATH, )
+STATICFILES_DIRS = (STATIC_PATH,)
 
 
 # Template files (*.html)
 
 TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
 
-TEMPLATE_DIRS = ( TEMPLATE_PATH, )
+TEMPLATE_DIRS = (TEMPLATE_PATH,)
 
 # Crispy settings
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 CRISPY_FAIL_SILENTLY = False
 
 # Date display stuff
-DATE_FORMAT = ('%Y-%m-%d', )
+DATE_FORMAT = ('%Y-%m-%d',)
 DATETIME_FORMAT = ('%Y-%m-%d %H:%M:%S',)
 
 # REST framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-#        'rest_framework.authentication.TokenAuthentication',
-#        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.permissions.DjangoModelPermissions',
     ),
 
     'DEFAULT_PERMISSION_CLASSES': (
-#        'rest_framework.permissions.DjangoModelPermissions',
-#        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.DjangoModelPermissions',
+        'rest_framework.permissions.IsAuthenticated',
     ),
 
     'DEFAULT_FILTER_BACKENDS': (
